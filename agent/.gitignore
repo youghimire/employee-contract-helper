@@ -1,3 +1,7 @@
+###application specific###
+*.properties
+
+### spring ###
 HELP.md
 target/
 !.mvn/wrapper/maven-wrapper.jar
