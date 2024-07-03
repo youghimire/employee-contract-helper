@@ -1,8 +1,8 @@
 package ghimire.ujjwal.agent.controller.impl;
 
 import ghimire.ujjwal.agent.controller.MLHandler;
-import ghimire.ujjwal.agent.dtos.AgentRequest;
-import ghimire.ujjwal.agent.dtos.AgentResponse;
+import ghimire.ujjwal.agent.rest.dtos.AgentRequest;
+import ghimire.ujjwal.agent.rest.dtos.AgentResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -1,4 +1,4 @@
-package ghimire.ujjwal.agent.dtos;
+package ghimire.ujjwal.agent.rest.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

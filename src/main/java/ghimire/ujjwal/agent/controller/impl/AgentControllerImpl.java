@@ -2,8 +2,8 @@ package ghimire.ujjwal.agent.controller.impl;
 
 import ghimire.ujjwal.agent.controller.AgentController;
 import ghimire.ujjwal.agent.controller.MLHandler;
-import ghimire.ujjwal.agent.dtos.AgentRequest;
-import ghimire.ujjwal.agent.dtos.AgentResponse;
+import ghimire.ujjwal.agent.rest.dtos.AgentRequest;
+import ghimire.ujjwal.agent.rest.dtos.AgentResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
