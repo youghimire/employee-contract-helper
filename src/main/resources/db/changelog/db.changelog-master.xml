@@ -15,4 +15,20 @@
         </createTable>
     </changeSet>
 
+    <changeSet id="2" author="ujjwal">
+        <createTable tableName="messages">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="session_id" type="bigint"/>
+            <column name="created" type="datetime"/>
+            <column name="role" type="text"/>
+            <column name="content" type="text"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="messages" baseColumnNames="session_id"
+                                 constraintName="message_session_id"
+                                 referencedTableName="session"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
 </databaseChangeLog>
