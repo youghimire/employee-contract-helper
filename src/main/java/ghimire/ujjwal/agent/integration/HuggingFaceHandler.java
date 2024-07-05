@@ -1,6 +1,7 @@
-package ghimire.ujjwal.agent.controller.impl;
+package ghimire.ujjwal.agent.integration;
 
-import ghimire.ujjwal.agent.controller.MLHandler;
+import ghimire.ujjwal.agent.integration.gemma.GemmaRequest;
+import ghimire.ujjwal.agent.integration.gemma.Parameters;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,6 +15,7 @@ import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
+import java.util.List;
 
 @Service
 public class HuggingFaceHandler implements MLHandler {
@@ -28,11 +30,11 @@ public class HuggingFaceHandler implements MLHandler {
     private String HFModel;
 
     @Override
-    public String handleQuery(String query, String context) {
-        return inference(query, context);
+    public String handleQuery(List<ModelMessage> context) {
+        return inference(context);
     }
 
-    private String inference(String query, String context) {
+    private String inference(List<ModelMessage> context) {
 
         RestTemplate restTemplate = new RestTemplate();
         restTemplate.setErrorHandler(new HandleHuggingFaceError());
@@ -40,19 +42,23 @@ public class HuggingFaceHandler implements MLHandler {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + HFToken);
 
-        HuggingFaceInput huggingFaceInput = new HuggingFaceInput(query, context);
-        HttpEntity<HuggingFaceInput> entity = new HttpEntity<>(huggingFaceInput, headers);
-        ResponseEntity<HuggingFaceOutput> responseEntity = restTemplate.exchange(HFApiURL + HFModel, HttpMethod.POST, entity, HuggingFaceOutput.class);
+//        HuggingFaceInput huggingFaceInput = new HuggingFaceInput(query, context);
+        GemmaRequest request = new GemmaRequest(100, context, HFModel, new Parameters(200));
+        HttpEntity<GemmaRequest> entity = new HttpEntity<>(request, headers);
+//        ResponseEntity<HuggingFaceOutput> responseEntity = restTemplate.exchange(HFApiURL + HFModel, HttpMethod.POST, entity, HuggingFaceOutput.class);
+        ResponseEntity<String> responseEntity = restTemplate.exchange(HFApiURL + HFModel, HttpMethod.POST, entity, String.class);
         if(responseEntity.getStatusCode().is5xxServerError()) {
             try {
                 Thread.sleep(10000);
-                responseEntity = restTemplate.exchange(HFApiURL + HFModel, HttpMethod.POST, entity, HuggingFaceOutput.class);
+                responseEntity = restTemplate.exchange(HFApiURL + HFModel, HttpMethod.POST, entity, String.class);
             } catch (InterruptedException e) {
                 log.error("When waiting to load model ", e);
             }
         }
         if(responseEntity.getStatusCode().is2xxSuccessful() && responseEntity.getBody() != null) {
-            return responseEntity.getBody().getAnswer();
+            String body = responseEntity.getBody();
+            log.debug("HuggingFace response: {}", body);
+            return body;
         }
         return "";
     }
@@ -64,7 +70,7 @@ public class HuggingFaceHandler implements MLHandler {
             if(HttpStatusCode.valueOf(503).equals(statusCode)) {
                 log.error("Hugging face Model is currently loading waiting...");
             }else {
-                log.error("Atlas returned error {}: {}", response.getStatusCode(), response.getStatusText());
+                log.error("Hugging face returned error {}: {}", response.getStatusCode(), response.getStatusText());
             }
         }
     }

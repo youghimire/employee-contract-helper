@@ -1,6 +1,6 @@
 package ghimire.ujjwal.agent.controller.impl;
 
-import ghimire.ujjwal.agent.controller.MLHandler;
+import ghimire.ujjwal.agent.integration.MLHandler;
 import ghimire.ujjwal.agent.rest.dtos.AgentRequest;
 import ghimire.ujjwal.agent.rest.dtos.AgentResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,8 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,9 +30,9 @@ class AgentControllerImplTest {
     @Test
     void testProcessQuery() {
         String context = "My name is ujjwal";
-        final AgentRequest agentRequest = new AgentRequest("What's my name?");
+        final AgentRequest agentRequest = new AgentRequest("What's my name?", 1L);
         final AgentResponse expectedResult = new AgentResponse("Ujjwal");
-        when(mockMlHandler.handleQuery(eq(agentRequest.getQuestion()), anyString())).thenReturn(expectedResult.getResponse());
+        when(mockMlHandler.handleQuery(anyList())).thenReturn(expectedResult.getResponse());
 
         final AgentResponse result = agentControllerImplUnderTest.processQuery("appToken", agentRequest);
         assertThat(result).isEqualTo(expectedResult);
@@ -41,6 +40,6 @@ class AgentControllerImplTest {
 
     @Test
     void testGetContext() {
-        assertThat(agentControllerImplUnderTest.getAgentContext().isEmpty()).isFalse();
+        assertThat(agentControllerImplUnderTest.getAgentContext(1L).isEmpty()).isFalse();
     }
 }

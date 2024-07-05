@@ -11,4 +11,5 @@ import lombok.ToString;
 @ToString
 public class AgentRequest {
     private String question;
+    private Long sessionId;
 }
