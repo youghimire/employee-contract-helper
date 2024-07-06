@@ -1,4 +1,4 @@
-package ghimire.ujjwal.agent.integration.hf.dto;
+package ghimire.ujjwal.agent.llm.hf.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,5 +8,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Parameters {
-    private Integer max_new_tokens;
+    private Double temperature;
 }

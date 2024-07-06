@@ -1,15 +1,14 @@
-package ghimire.ujjwal.agent.integration.hf;
+package ghimire.ujjwal.agent.llm.hf;
 
-import ghimire.ujjwal.agent.integration.MLHandler;
-import ghimire.ujjwal.agent.integration.ModelMessage;
-import ghimire.ujjwal.agent.integration.hf.dto.HFRequest;
-import ghimire.ujjwal.agent.integration.hf.dto.Parameters;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import ghimire.ujjwal.agent.llm.AbstractMLHandler;
+import ghimire.ujjwal.agent.llm.ModelMessage;
+import ghimire.ujjwal.agent.llm.hf.dto.HFRequest;
+import ghimire.ujjwal.agent.llm.hf.dto.Parameters;
+import ghimire.ujjwal.agent.llm.openai.dto.OpenAICompletionResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.*;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Service;
@@ -20,7 +19,8 @@ import java.io.IOException;
 import java.util.List;
 
 @Service
-public class HuggingFaceHandler implements MLHandler {
+@Primary
+public class HuggingFaceHandler extends AbstractMLHandler {
 
     private static final Logger log = LoggerFactory.getLogger(HuggingFaceHandler.class);
 
@@ -33,36 +33,23 @@ public class HuggingFaceHandler implements MLHandler {
 
     @Override
     public ModelMessage handleQuery(List<ModelMessage> context) {
-        return inference(context);
-    }
-
-    private ModelMessage inference(List<ModelMessage> context) {
-
         RestTemplate restTemplate = new RestTemplate();
         restTemplate.setErrorHandler(new HandleHuggingFaceError());
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + HFToken);
-
-//        HuggingFaceInput huggingFaceInput = new HuggingFaceInput(query, context);
-        HFRequest request = new HFRequest(100, context, HFModel, new Parameters(200));
-        HttpEntity<HFRequest> entity = new HttpEntity<>(request, headers);
-//        ResponseEntity<HuggingFaceOutput> responseEntity = restTemplate.exchange(HFApiURL + HFModel, HttpMethod.POST, entity, HuggingFaceOutput.class);
-        ResponseEntity<String> responseEntity = restTemplate.exchange(HFApiURL + HFModel, HttpMethod.POST, entity, String.class);
+        HttpEntity<HFRequest> entity = new HttpEntity<>(new HFRequest(HFModel, context, new Parameters(0D), Boolean.FALSE), headers);
+        String url = "%s%s/v1/chat/completions".formatted(HFApiURL, HFModel);
+        ResponseEntity<OpenAICompletionResponse> responseEntity = restTemplate.exchange(url, HttpMethod.POST, entity, OpenAICompletionResponse.class);
         if(responseEntity.getStatusCode().is5xxServerError()) {
             try {
                 Thread.sleep(10000);
-                responseEntity = restTemplate.exchange(HFApiURL + HFModel, HttpMethod.POST, entity, String.class);
+                responseEntity = restTemplate.exchange(url, HttpMethod.POST, entity, OpenAICompletionResponse.class);
             } catch (InterruptedException e) {
                 log.error("When waiting to load model ", e);
             }
         }
-        if(responseEntity.getStatusCode().is2xxSuccessful() && responseEntity.getBody() != null) {
-            String body = responseEntity.getBody();
-            log.debug("HuggingFace response: {}", body);
-            return new ModelMessage("assistant", body);
-        }
-        return null;
+        return getModelMessage(responseEntity);
     }
 
     public static class HandleHuggingFaceError extends DefaultResponseErrorHandler {
@@ -76,24 +63,4 @@ public class HuggingFaceHandler implements MLHandler {
             }
         }
     }
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    static class HuggingFaceInput {
-        String question;
-        String context;
-    }
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    static class HuggingFaceOutput {
-        Double score;
-        Integer start;
-        Integer end;
-        String answer;
-    }
-
-
 }

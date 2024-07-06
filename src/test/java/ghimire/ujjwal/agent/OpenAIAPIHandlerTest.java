@@ -1,7 +1,8 @@
-package ghimire.ujjwal.agent.integration.openai;
+package ghimire.ujjwal.agent;
 
-import ghimire.ujjwal.agent.integration.ModelMessage;
-import ghimire.ujjwal.agent.integration.openai.dto.OpenAICompletionRequest;
+import ghimire.ujjwal.agent.llm.ModelMessage;
+import ghimire.ujjwal.agent.llm.openai.OpenAIAPIHandler;
+import ghimire.ujjwal.agent.llm.openai.dto.OpenAICompletionRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpEntity;
@@ -21,7 +22,6 @@ class OpenAIAPIHandlerTest {
     void setUp() {
         openAIAPIHandlerUnderTest = new OpenAIAPIHandler();
         ReflectionTestUtils.setField(openAIAPIHandlerUnderTest, "URL", "http://localhost:1234/v1/chat/completions");
-        ReflectionTestUtils.setField(openAIAPIHandlerUnderTest, "MODEL", "bartowski/Phi-3.1-mini-4k-instruct-GGUF");
     }
 
     @Test
@@ -45,7 +45,6 @@ class OpenAIAPIHandlerTest {
 
         //Expected Result
         final OpenAICompletionRequest request = new OpenAICompletionRequest();
-        request.setModel("bartowski/Phi-3.1-mini-4k-instruct-GGUF");
         final ModelMessage modelMessage = new ModelMessage();
         modelMessage.setRole("system");
         modelMessage.setContent("This is context");

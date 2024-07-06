@@ -1,4 +1,4 @@
-package ghimire.ujjwal.agent.integration;
+package ghimire.ujjwal.agent.resources.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -6,10 +6,10 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @ToString
-public class ModelMessage {
-    private String role;
+public class MessageDTO {
     private String content;
+    private Long sessionId;
 }

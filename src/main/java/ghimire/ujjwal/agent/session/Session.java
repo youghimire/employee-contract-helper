@@ -21,7 +21,8 @@ public class Session {
         this.title = title;
     }
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(generator="session_seq", strategy = GenerationType.SEQUENCE)
+    @SequenceGenerator(name="session_seq",sequenceName="session_seq", allocationSize=1)
     private Long id;
 
     @Column

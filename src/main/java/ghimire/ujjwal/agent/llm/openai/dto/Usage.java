@@ -1,4 +1,4 @@
-package ghimire.ujjwal.agent.integration.openai.dto;
+package ghimire.ujjwal.agent.llm.openai.dto;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

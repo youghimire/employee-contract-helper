@@ -31,4 +31,9 @@
                                  referencedColumnNames="id"/>
     </changeSet>
 
+    <changeSet id="1720279628434-1" author="ujjwal">
+        <createSequence sequenceName="message_seq" minValue="100" incrementBy="1"></createSequence>
+        <createSequence sequenceName="session_seq" minValue="100" incrementBy="1"></createSequence>
+    </changeSet>
+
 </databaseChangeLog>

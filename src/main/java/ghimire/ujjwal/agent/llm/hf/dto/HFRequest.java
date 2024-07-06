@@ -1,6 +1,6 @@
-package ghimire.ujjwal.agent.integration.hf.dto;
+package ghimire.ujjwal.agent.llm.hf.dto;
 
-import ghimire.ujjwal.agent.integration.ModelMessage;
+import ghimire.ujjwal.agent.llm.ModelMessage;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,8 +11,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class HFRequest {
-    Integer max_new_tokens;
-    List<ModelMessage> messages;
     String model;
+    List<ModelMessage> messages;
     Parameters parameters;
+    Boolean stream;
 }

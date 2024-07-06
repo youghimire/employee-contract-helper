@@ -1,11 +1,10 @@
 package ghimire.ujjwal.agent.message;
 
-import ghimire.ujjwal.agent.integration.ModelMessage;
+import ghimire.ujjwal.agent.llm.ModelMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class MessageServiceImpl implements MessageService {
@@ -25,6 +24,7 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public List<Message> saveModelMessages(List<ModelMessage> modelMessages, Long sessionId) {
-        return messageRepository.saveAll(modelMessages.stream().map(mm -> new Message(mm, sessionId)).collect(Collectors.toSet()));
+        List<Message> messages = modelMessages.stream().map(mm -> new Message(mm, sessionId)).toList();
+        return messageRepository.saveAll(messages);
     }
 }

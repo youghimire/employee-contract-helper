@@ -1,6 +1,6 @@
-package ghimire.ujjwal.agent.integration.openai.dto;
+package ghimire.ujjwal.agent.llm.openai.dto;
 
-import ghimire.ujjwal.agent.integration.ModelMessage;
+import ghimire.ujjwal.agent.llm.ModelMessage;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

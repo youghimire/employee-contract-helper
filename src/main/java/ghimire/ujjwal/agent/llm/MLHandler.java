@@ -1,4 +1,4 @@
-package ghimire.ujjwal.agent.integration;
+package ghimire.ujjwal.agent.llm;
 
 import java.util.List;
 

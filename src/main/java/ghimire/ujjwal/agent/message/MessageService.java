@@ -1,6 +1,6 @@
 package ghimire.ujjwal.agent.message;
 
-import ghimire.ujjwal.agent.integration.ModelMessage;
+import ghimire.ujjwal.agent.llm.ModelMessage;
 
 import java.util.List;
 
