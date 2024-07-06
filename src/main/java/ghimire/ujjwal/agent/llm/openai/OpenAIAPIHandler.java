@@ -1,14 +1,12 @@
 package ghimire.ujjwal.agent.llm.openai;
 
 import ghimire.ujjwal.agent.llm.AbstractMLHandler;
-import ghimire.ujjwal.agent.llm.MLHandler;
 import ghimire.ujjwal.agent.llm.ModelMessage;
 import ghimire.ujjwal.agent.llm.openai.dto.OpenAICompletionRequest;
 import ghimire.ujjwal.agent.llm.openai.dto.OpenAICompletionResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Primary;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
