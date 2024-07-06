@@ -8,5 +8,5 @@ import java.util.List;
 
 public interface AgentController {
     AgentResponse processQuery(String token, AgentRequest agentRequest);
-    List<ModelMessage> getAgentContext(Long sessionId);
+    List<ModelMessage> getSessionHistory(Long sessionId);
 }

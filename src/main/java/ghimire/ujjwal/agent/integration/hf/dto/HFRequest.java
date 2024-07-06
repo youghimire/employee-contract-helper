@@ -1,4 +1,4 @@
-package ghimire.ujjwal.agent.integration.gemma;
+package ghimire.ujjwal.agent.integration.hf.dto;
 
 import ghimire.ujjwal.agent.integration.ModelMessage;
 import lombok.AllArgsConstructor;
@@ -10,7 +10,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class GemmaRequest {
+public class HFRequest {
     Integer max_new_tokens;
     List<ModelMessage> messages;
     String model;

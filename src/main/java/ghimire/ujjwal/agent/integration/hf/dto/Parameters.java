@@ -1,4 +1,4 @@
-package ghimire.ujjwal.agent.integration.gemma;
+package ghimire.ujjwal.agent.integration.hf.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

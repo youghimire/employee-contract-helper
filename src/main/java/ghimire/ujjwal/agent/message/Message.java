@@ -1,5 +1,6 @@
 package ghimire.ujjwal.agent.message;
 
+import ghimire.ujjwal.agent.integration.ModelMessage;
 import ghimire.ujjwal.agent.session.Session;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -13,6 +14,9 @@ import java.time.LocalDateTime;
 @Table(name = "messages")
 public class Message {
 
+    public Message(ModelMessage modelMessage, Long Session) {
+
+    }
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;

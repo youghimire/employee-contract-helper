@@ -1,7 +1,9 @@
-package ghimire.ujjwal.agent.integration;
+package ghimire.ujjwal.agent.integration.hf;
 
-import ghimire.ujjwal.agent.integration.gemma.GemmaRequest;
-import ghimire.ujjwal.agent.integration.gemma.Parameters;
+import ghimire.ujjwal.agent.integration.MLHandler;
+import ghimire.ujjwal.agent.integration.ModelMessage;
+import ghimire.ujjwal.agent.integration.hf.dto.HFRequest;
+import ghimire.ujjwal.agent.integration.hf.dto.Parameters;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -30,11 +32,11 @@ public class HuggingFaceHandler implements MLHandler {
     private String HFModel;
 
     @Override
-    public String handleQuery(List<ModelMessage> context) {
+    public ModelMessage handleQuery(List<ModelMessage> context) {
         return inference(context);
     }
 
-    private String inference(List<ModelMessage> context) {
+    private ModelMessage inference(List<ModelMessage> context) {
 
         RestTemplate restTemplate = new RestTemplate();
         restTemplate.setErrorHandler(new HandleHuggingFaceError());
@@ -43,8 +45,8 @@ public class HuggingFaceHandler implements MLHandler {
         headers.set("Authorization", "Bearer " + HFToken);
 
 //        HuggingFaceInput huggingFaceInput = new HuggingFaceInput(query, context);
-        GemmaRequest request = new GemmaRequest(100, context, HFModel, new Parameters(200));
-        HttpEntity<GemmaRequest> entity = new HttpEntity<>(request, headers);
+        HFRequest request = new HFRequest(100, context, HFModel, new Parameters(200));
+        HttpEntity<HFRequest> entity = new HttpEntity<>(request, headers);
 //        ResponseEntity<HuggingFaceOutput> responseEntity = restTemplate.exchange(HFApiURL + HFModel, HttpMethod.POST, entity, HuggingFaceOutput.class);
         ResponseEntity<String> responseEntity = restTemplate.exchange(HFApiURL + HFModel, HttpMethod.POST, entity, String.class);
         if(responseEntity.getStatusCode().is5xxServerError()) {
@@ -58,9 +60,9 @@ public class HuggingFaceHandler implements MLHandler {
         if(responseEntity.getStatusCode().is2xxSuccessful() && responseEntity.getBody() != null) {
             String body = responseEntity.getBody();
             log.debug("HuggingFace response: {}", body);
-            return body;
+            return new ModelMessage("assistant", body);
         }
-        return "";
+        return null;
     }
 
     public static class HandleHuggingFaceError extends DefaultResponseErrorHandler {

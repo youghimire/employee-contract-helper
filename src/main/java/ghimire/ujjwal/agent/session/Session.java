@@ -11,6 +11,15 @@ import java.time.LocalDateTime;
 @Entity
 public class Session {
 
+    public interface STATUS {
+        String ACTIVE = "ACTIVE";
+        String DELETE = "DELETED";
+    }
+    public Session(String title) {
+        this.created = LocalDateTime.now();
+        this.status = STATUS.ACTIVE;
+        this.title = title;
+    }
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;

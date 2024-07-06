@@ -1,6 +1,7 @@
 package ghimire.ujjwal.agent.controller.impl;
 
 import ghimire.ujjwal.agent.integration.MLHandler;
+import ghimire.ujjwal.agent.integration.ModelMessage;
 import ghimire.ujjwal.agent.rest.dtos.AgentRequest;
 import ghimire.ujjwal.agent.rest.dtos.AgentResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,7 +33,7 @@ class AgentControllerImplTest {
         String context = "My name is ujjwal";
         final AgentRequest agentRequest = new AgentRequest("What's my name?", 1L);
         final AgentResponse expectedResult = new AgentResponse("Ujjwal");
-        when(mockMlHandler.handleQuery(anyList())).thenReturn(expectedResult.getResponse());
+        when(mockMlHandler.handleQuery(anyList())).thenReturn(new ModelMessage("assistant", expectedResult.getResponse()));
 
         final AgentResponse result = agentControllerImplUnderTest.processQuery("appToken", agentRequest);
         assertThat(result).isEqualTo(expectedResult);
@@ -40,6 +41,6 @@ class AgentControllerImplTest {
 
     @Test
     void testGetContext() {
-        assertThat(agentControllerImplUnderTest.getAgentContext(1L).isEmpty()).isFalse();
+        assertThat(agentControllerImplUnderTest.getSessionHistory(1L).isEmpty()).isFalse();
     }
 }
