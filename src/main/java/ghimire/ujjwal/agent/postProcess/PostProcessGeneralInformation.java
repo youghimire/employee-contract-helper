@@ -13,7 +13,6 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 public class PostProcessGeneralInformation {
-    private static final Logger log = LoggerFactory.getLogger(PostProcessGeneralInformation.class);
 
     private static final Map<String, String> countries = new HashMap<>();
     static {

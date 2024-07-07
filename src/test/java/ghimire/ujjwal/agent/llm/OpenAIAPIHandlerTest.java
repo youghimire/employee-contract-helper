@@ -10,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
+import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -56,6 +57,6 @@ class OpenAIAPIHandlerTest {
         final HttpEntity<OpenAICompletionRequest> result = openAIAPIHandlerUnderTest.getRequestHttpEntity(context);
 
         // Verify the results
-        assertThat(result.getBody().getMessages()).isEqualTo(expectedResult.getBody().getMessages());
+        assertThat(Objects.requireNonNull(result.getBody()).getMessages()).isEqualTo(Objects.requireNonNull(expectedResult.getBody()).getMessages());
     }
 }
