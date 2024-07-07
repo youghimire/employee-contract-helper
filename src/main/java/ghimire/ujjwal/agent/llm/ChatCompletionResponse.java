@@ -1,5 +1,7 @@
-package ghimire.ujjwal.agent.llm.openai.dto;
+package ghimire.ujjwal.agent.llm;
 
+import ghimire.ujjwal.agent.llm.openai.dto.Choice;
+import ghimire.ujjwal.agent.llm.openai.dto.Usage;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -8,7 +10,7 @@ import java.util.List;
 
 @Data
 @NoArgsConstructor
-public class OpenAICompletionResponse {
+public class ChatCompletionResponse {
 
     private String id;
     private String object;

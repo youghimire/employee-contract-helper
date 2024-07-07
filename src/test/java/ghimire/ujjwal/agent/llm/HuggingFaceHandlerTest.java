@@ -1,7 +1,6 @@
-package ghimire.ujjwal.agent;
+package ghimire.ujjwal.agent.llm;
 
 import ghimire.ujjwal.agent.llm.hf.HuggingFaceHandler;
-import ghimire.ujjwal.agent.llm.ModelMessage;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,7 +18,7 @@ class HuggingFaceHandlerTest {
     @Test
     void testHandleQuery() {
         // Setup
-        final List<ModelMessage> context = List.of(new ModelMessage("system", "Answer based on the context provided below. Your name is John."), new ModelMessage("user", "What's your name?"));
+        final List<ModelMessage> context = List.of(new ModelMessage("system", "Answer based on the context provided below. For now Your given name is John."), new ModelMessage("user", "What's your given name?"));
         final ModelMessage expectedResult = new ModelMessage("assistant", "John");
 
         // Run the test

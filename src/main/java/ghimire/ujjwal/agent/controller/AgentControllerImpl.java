@@ -56,6 +56,8 @@ public class AgentControllerImpl implements AgentController {
         return new MessageDTO(aiResponse.getContent(), sessionId);
     }
 
+
+
     private Long createNewSession(MessageDTO agentRequest) {
         Session session = sessionService.createSession(new Session(agentRequest.getContent()));
         messageService.saveModelMessages(Collections.singletonList(new ModelMessage("assistant", "Can you provide me your employee name?")), session.getId());
@@ -70,7 +72,7 @@ public class AgentControllerImpl implements AgentController {
         return modelMessages;
     }
 
-    public static ModelMessage getInstruction() throws IOException {
+    public ModelMessage getInstruction() throws IOException {
         byte[] contextBArray = Files.readAllBytes(Paths.get("src/main/resources/agent1.context.txt"));
         return new ModelMessage("system", new String(contextBArray));
     }

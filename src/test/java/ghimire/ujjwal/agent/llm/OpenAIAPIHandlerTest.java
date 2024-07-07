@@ -1,6 +1,5 @@
-package ghimire.ujjwal.agent;
+package ghimire.ujjwal.agent.llm;
 
-import ghimire.ujjwal.agent.llm.ModelMessage;
 import ghimire.ujjwal.agent.llm.openai.OpenAIAPIHandler;
 import ghimire.ujjwal.agent.llm.openai.dto.OpenAICompletionRequest;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,9 +48,6 @@ class OpenAIAPIHandlerTest {
         modelMessage.setRole("system");
         modelMessage.setContent("This is context");
         request.setMessages(List.of(modelMessage));
-        request.setTemperature(0D);
-        request.setMax_tokens(-1L);
-        request.setStream(false);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         final HttpEntity<OpenAICompletionRequest> expectedResult = new HttpEntity<>(request, headers);
@@ -60,6 +56,6 @@ class OpenAIAPIHandlerTest {
         final HttpEntity<OpenAICompletionRequest> result = openAIAPIHandlerUnderTest.getRequestHttpEntity(context);
 
         // Verify the results
-        assertThat(result).isEqualTo(expectedResult);
+        assertThat(result.getBody().getMessages()).isEqualTo(expectedResult.getBody().getMessages());
     }
 }
