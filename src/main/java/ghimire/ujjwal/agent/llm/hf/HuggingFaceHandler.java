@@ -32,7 +32,7 @@ public class HuggingFaceHandler extends AbstractMLHandler {
     @Value("${huggingface.model}")
     private String HFModel;
 
-    RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate = new RestTemplate();
 
     @Override
     public ResponseEntity<ChatCompletionResponse> queryLLM(List<ModelMessage> context) {

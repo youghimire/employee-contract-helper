@@ -24,7 +24,7 @@ public class OpenAIAPIHandler extends AbstractMLHandler {
     private String URL;
     private final Boolean STREAM = Boolean.FALSE;
 
-    RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate = new RestTemplate();
 
     public ResponseEntity<ChatCompletionResponse> queryLLM(List<ModelMessage> context) {
         log.debug("Asking to LLM with context {} \n URL {}", context, URL);
