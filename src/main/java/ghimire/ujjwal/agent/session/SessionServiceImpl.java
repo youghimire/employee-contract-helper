@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class SessionServiceImpl implements SessionService{
@@ -17,7 +18,12 @@ public class SessionServiceImpl implements SessionService{
     }
 
     @Override
-    public Session createSession(Session session) {
+    public Session saveSession(Session session) {
         return sessionRepository.save(session);
+    }
+
+    @Override
+    public Optional<Session> findById(Long sessionId) {
+        return sessionRepository.findById(sessionId);
     }
 }

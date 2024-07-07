@@ -1,9 +1,12 @@
 package ghimire.ujjwal.agent.controller;
 
+import ghimire.ujjwal.agent.contract.ContractService;
 import ghimire.ujjwal.agent.llm.MLHandler;
 import ghimire.ujjwal.agent.llm.ModelMessage;
 import ghimire.ujjwal.agent.message.Message;
 import ghimire.ujjwal.agent.message.MessageService;
+import ghimire.ujjwal.agent.postProcess.GeneralInformation;
+import ghimire.ujjwal.agent.postProcess.PostProcessGeneralInformation;
 import ghimire.ujjwal.agent.resources.dtos.MessageDTO;
 import ghimire.ujjwal.agent.session.Session;
 import ghimire.ujjwal.agent.session.SessionService;
@@ -15,7 +18,6 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,11 +33,14 @@ public class AgentControllerImpl implements AgentController {
 
     private final SessionService sessionService;
 
+    private final ContractService contractService;
+
     @Autowired
-    public AgentControllerImpl(MLHandler mlHandler, MessageService messageService, SessionService sessionService ) {
+    public AgentControllerImpl(MLHandler mlHandler, MessageService messageService, SessionService sessionService, ContractService contractService ) {
         this.mlHandler = mlHandler;
         this.messageService = messageService;
         this.sessionService = sessionService;
+        this.contractService = contractService;
     }
 
     @Override
@@ -48,18 +53,32 @@ public class AgentControllerImpl implements AgentController {
         List<ModelMessage> sessionHistory = getSessionHistory(sessionId);
 
         ModelMessage currentQuery = new ModelMessage("user", agentRequest.getContent());
+        messageService.saveModelMessages(List.of(currentQuery), sessionId);
         sessionHistory.add(currentQuery);
 
         ModelMessage aiResponse = mlHandler.handleQuery(sessionHistory);
 
-        messageService.saveModelMessages(Arrays.asList(currentQuery, aiResponse), sessionId);
+        if(PostProcessGeneralInformation.doContainsJson(aiResponse.getContent())) {
+            try {
+                String contractId = contractService.processInitialRequest(PostProcessGeneralInformation.mapTo(aiResponse.getContent(), GeneralInformation.class), appToken);
+                log.info("Contract saved with Id {}", contractId);
+                Session session = sessionService.findById(sessionId).get();
+                session.setContractId(contractId);
+                session = sessionService.saveSession(session);
+                return new MessageDTO("First stage completed.", sessionId );
+            } catch (Exception e) {
+                log.error("Error saving contract initial data ", e);
+                return new MessageDTO("Error saving the provided information! Please try again.", sessionId );
+            }
+        }
+        messageService.saveModelMessages(List.of(aiResponse), sessionId);
         return new MessageDTO(aiResponse.getContent(), sessionId);
     }
 
 
 
     private Long createNewSession(MessageDTO agentRequest) {
-        Session session = sessionService.createSession(new Session(agentRequest.getContent()));
+        Session session = sessionService.saveSession(new Session(agentRequest.getContent()));
         messageService.saveModelMessages(Collections.singletonList(new ModelMessage("assistant", "Can you provide me your employee name?")), session.getId());
         return session.getId();
     }

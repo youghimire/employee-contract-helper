@@ -12,12 +12,15 @@ import java.time.LocalDateTime;
 public class Session {
 
     public interface STATUS {
-        String ACTIVE = "ACTIVE";
-        String DELETE = "DELETED";
+        String STAGE0 = "ACTIVE";
+        String STAGE1 = "IN_PROGRESS";
+        String ERROR = "ERROR";
+        String COMPLETED = "COMPLETED";
+        String DELETED = "DELETED";
     }
     public Session(String title) {
         this.created = LocalDateTime.now();
-        this.status = STATUS.ACTIVE;
+        this.status = STATUS.STAGE0;
         this.title = title;
     }
     @Id
@@ -33,5 +36,8 @@ public class Session {
 
     @Column
     String title;
+
+    @Column
+    String contractId;
 
 }

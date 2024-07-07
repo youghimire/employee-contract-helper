@@ -36,4 +36,10 @@
         <createSequence sequenceName="session_seq" minValue="100" incrementBy="1"></createSequence>
     </changeSet>
 
+    <changeSet id="1720374795130-1" author="ujjwal">
+        <addColumn tableName="session">
+            <column name="contract_id" type="text"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>
