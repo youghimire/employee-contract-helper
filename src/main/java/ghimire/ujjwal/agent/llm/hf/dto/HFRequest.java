@@ -14,5 +14,6 @@ public class HFRequest {
     String model;
     List<ModelMessage> messages;
     Parameters parameters;
+    Long max_tokens;
     Boolean stream;
 }

@@ -15,7 +15,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.List;
 
 @Service
-@Primary
+
 public class OpenAIAPIHandler extends AbstractMLHandler {
 
     private static final Logger log = LoggerFactory.getLogger(OpenAIAPIHandler.class);

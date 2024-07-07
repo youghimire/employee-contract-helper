@@ -2,8 +2,6 @@ package ghimire.ujjwal.agent.postProcess;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
 import java.util.HashMap;
@@ -21,7 +19,6 @@ public class PostProcessGeneralInformation {
             countries.put(iso.toUpperCase(), l.getDisplayCountry());
         }
     }
-
 
     public static Boolean doContainsJson(String content) {
         int start = content.indexOf('{');

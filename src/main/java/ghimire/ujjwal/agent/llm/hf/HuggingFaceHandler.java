@@ -8,6 +8,7 @@ import ghimire.ujjwal.agent.llm.ChatCompletionResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.*;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,7 @@ import java.io.IOException;
 import java.util.List;
 
 @Service
-
+@Primary
 public class HuggingFaceHandler extends AbstractMLHandler {
 
     private static final Logger log = LoggerFactory.getLogger(HuggingFaceHandler.class);
@@ -39,7 +40,7 @@ public class HuggingFaceHandler extends AbstractMLHandler {
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + HFToken);
-        HttpEntity<HFRequest> entity = new HttpEntity<>(new HFRequest(HFModel, context, new Parameters(0D), Boolean.FALSE), headers);
+        HttpEntity<HFRequest> entity = new HttpEntity<>(new HFRequest(HFModel, context, new Parameters(0D), 250L, Boolean.FALSE), headers);
         String url = "%s%s/v1/chat/completions".formatted(HFApiURL, HFModel);
         log.debug("Asking to LLM with question {} context size {} \n URL {}", context.isEmpty() ? "" : context.get(context.size()-1), context.size(), url);
         ResponseEntity<ChatCompletionResponse> responseEntity = restTemplate.exchange(url, HttpMethod.POST, entity, ChatCompletionResponse.class);
