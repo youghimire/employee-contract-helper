@@ -20,6 +20,10 @@ public class PostProcessGeneralInformation {
         }
     }
 
+    public static String getCountryName(String iso) {
+        return countries.get(iso.toUpperCase());
+    }
+
     public static Boolean doContainsJson(String content) {
         int start = content.indexOf('{');
         int end = content.indexOf('}');
@@ -50,5 +54,10 @@ public class PostProcessGeneralInformation {
         } catch (Exception e) {
             return Optional.of(e.getMessage());
         }
+    }
+
+    public static <T> T mapTo(String content, Class<T> valueType) throws JsonProcessingException {
+        String jsonString = content.substring(content.indexOf('{'), content.indexOf('}') + 1);
+        return mapper.readValue(jsonString, valueType);
     }
 }
