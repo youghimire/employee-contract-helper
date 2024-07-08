@@ -5,11 +5,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 
+@Service
 public class ContractServiceImpl implements ContractService{
     private static final Logger log = LoggerFactory.getLogger(ContractServiceImpl.class);
 

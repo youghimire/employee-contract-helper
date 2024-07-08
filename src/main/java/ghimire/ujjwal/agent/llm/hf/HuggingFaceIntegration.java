@@ -1,6 +1,6 @@
 package ghimire.ujjwal.agent.llm.hf;
 
-import ghimire.ujjwal.agent.llm.AbstractMLHandler;
+import ghimire.ujjwal.agent.llm.LLMIntegration;
 import ghimire.ujjwal.agent.llm.ModelMessage;
 import ghimire.ujjwal.agent.llm.hf.dto.HFRequest;
 import ghimire.ujjwal.agent.llm.hf.dto.Parameters;
@@ -21,9 +21,9 @@ import java.util.List;
 
 @Service
 @Primary
-public class HuggingFaceHandler extends AbstractMLHandler {
+public class HuggingFaceIntegration implements LLMIntegration {
 
-    private static final Logger log = LoggerFactory.getLogger(HuggingFaceHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(HuggingFaceIntegration.class);
 
     @Value("${huggingface.token}")
     private String HFToken;
@@ -53,6 +53,11 @@ public class HuggingFaceHandler extends AbstractMLHandler {
             }
         }
         return responseEntity;
+    }
+
+    @Override
+    public String vendorName() {
+        return LLMVendors.HFInference;
     }
 
     public static class HandleHuggingFaceError extends DefaultResponseErrorHandler {

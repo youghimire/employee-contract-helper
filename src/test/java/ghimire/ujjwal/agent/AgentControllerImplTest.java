@@ -2,9 +2,8 @@ package ghimire.ujjwal.agent;
 
 import ghimire.ujjwal.agent.contract.ContractService;
 import ghimire.ujjwal.agent.controller.AgentControllerImpl;
-import ghimire.ujjwal.agent.llm.MLHandler;
+import ghimire.ujjwal.agent.llm.LLMHandler;
 import ghimire.ujjwal.agent.llm.ModelMessage;
-import ghimire.ujjwal.agent.llm.openai.OpenAIAPIHandler;
 import ghimire.ujjwal.agent.message.Message;
 import ghimire.ujjwal.agent.message.MessageService;
 import ghimire.ujjwal.agent.resources.dtos.MessageDTO;
@@ -14,7 +13,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.IOException;
 import java.util.List;
@@ -31,7 +29,7 @@ class AgentControllerImplTest {
     @Mock
     private SessionService sessionService;
     @Mock
-    private MLHandler mlHandler;
+    private LLMHandler mlHandler;
     @Mock
     private ContractService contractService;
 
@@ -57,28 +55,6 @@ class AgentControllerImplTest {
         assertThat(result.getContent()).contains("Yes");
     }
 
-    //Need to Run Model locally may be using LM Studio opening at that URL and port
-    @Test
-    void testProcessQueryLocally() throws IOException {
-        OpenAIAPIHandler openAIAPIHandler = new OpenAIAPIHandler();
-        ReflectionTestUtils.setField(openAIAPIHandler, "URL", "http://localhost:1234/v1/chat/completions");
-        agentControllerImplUnderTest = new AgentControllerImpl(openAIAPIHandler, messageService, sessionService, contractService);
-
-        testProcessQuery();
-    }
-
-    /** Need to add token to run this test
-    @Test
-    void testProcessQueryWithHFAPI() throws IOException {
-        HuggingFaceHandler huggingFaceHandler = new HuggingFaceHandler();
-        ReflectionTestUtils.setField(huggingFaceHandler, "HFApiURL", "https://api-inference.huggingface.co/models/");
-        ReflectionTestUtils.setField(huggingFaceHandler, "HFToken", "");
-        ReflectionTestUtils.setField(huggingFaceHandler, "HFModel", "microsoft/Phi-3-mini-4k-instruct");
-        agentControllerImplUnderTest = new AgentControllerImpl(huggingFaceHandler, messageService, sessionService);
-
-        testProcessQuery();
-    }
-    **/
     @Test
     void testGetContext() throws IOException {
         Long sessionId = 1L;

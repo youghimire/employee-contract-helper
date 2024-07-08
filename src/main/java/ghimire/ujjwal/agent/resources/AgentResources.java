@@ -16,7 +16,7 @@ import java.io.IOException;
 public class AgentResources {
     private static final Logger log = LoggerFactory.getLogger(AgentResources.class);
 
-    AgentController agentController;
+    private final AgentController agentController;
 
     @Autowired
     public AgentResources(AgentController agentController) {

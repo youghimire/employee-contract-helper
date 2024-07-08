@@ -4,8 +4,14 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
-public interface MLHandler {
-    ModelMessage handleQuery(List<ModelMessage> context);
+public interface LLMIntegration {
 
     ResponseEntity<ChatCompletionResponse> queryLLM(List<ModelMessage> context);
+
+    String vendorName();
+
+    interface LLMVendors {
+        String LMStudio = "LMStudio";
+        String HFInference = "HFInference";
+    }
 }

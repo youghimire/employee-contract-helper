@@ -9,8 +9,11 @@ import java.util.Optional;
 @Service
 public class SessionServiceImpl implements SessionService{
 
+    private final SessionRepository sessionRepository;
     @Autowired
-    private SessionRepository sessionRepository;
+    public SessionServiceImpl(SessionRepository sessionRepository) {
+        this.sessionRepository = sessionRepository;
+    }
 
     @Override
     public List<Session> getAllSession() {

@@ -1,7 +1,7 @@
 package ghimire.ujjwal.agent.controller;
 
 import ghimire.ujjwal.agent.contract.ContractService;
-import ghimire.ujjwal.agent.llm.MLHandler;
+import ghimire.ujjwal.agent.llm.LLMHandler;
 import ghimire.ujjwal.agent.llm.ModelMessage;
 import ghimire.ujjwal.agent.message.Message;
 import ghimire.ujjwal.agent.message.MessageService;
@@ -27,7 +27,7 @@ public class AgentControllerImpl implements AgentController {
 
     private static final Logger log = LoggerFactory.getLogger(AgentControllerImpl.class);
 
-    private final MLHandler mlHandler;
+    private final LLMHandler mlHandler;
 
     private final MessageService messageService;
 
@@ -36,7 +36,7 @@ public class AgentControllerImpl implements AgentController {
     private final ContractService contractService;
 
     @Autowired
-    public AgentControllerImpl(MLHandler mlHandler, MessageService messageService, SessionService sessionService, ContractService contractService ) {
+    public AgentControllerImpl(LLMHandler mlHandler, MessageService messageService, SessionService sessionService, ContractService contractService ) {
         this.mlHandler = mlHandler;
         this.messageService = messageService;
         this.sessionService = sessionService;
@@ -62,9 +62,9 @@ public class AgentControllerImpl implements AgentController {
             try {
                 String contractId = contractService.processInitialRequest(PostProcessGeneralInformation.mapTo(aiResponse.getContent(), GeneralInformation.class), appToken);
                 log.info("Contract saved with Id {}", contractId);
-                Session session = sessionService.findById(sessionId).get();
+                Session session = sessionService.findById(sessionId).orElseThrow();
                 session.setContractId(contractId);
-                session = sessionService.saveSession(session);
+                sessionService.saveSession(session);
                 return new MessageDTO("First stage completed.", sessionId );
             } catch (Exception e) {
                 log.error("Error saving contract initial data ", e);

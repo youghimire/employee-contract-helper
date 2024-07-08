@@ -4,20 +4,44 @@ import ghimire.ujjwal.agent.postProcess.PostProcessGeneralInformation;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
-public abstract class AbstractMLHandler implements MLHandler{
-    private static final Logger log = LoggerFactory.getLogger(AbstractMLHandler.class);
+@Service
+public class LLMHandler {
+    private static final Logger log = LoggerFactory.getLogger(LLMHandler.class);
 
-    @Override
+    final Map<String, LLMIntegration> llmIntegrationMap;
+
+    @Autowired
+    public LLMHandler(List<LLMIntegration> llmIntegrations) {
+        llmIntegrationMap = new HashMap<>();
+        for (LLMIntegration llmIntegration : llmIntegrations) {
+            llmIntegrationMap.putIfAbsent(llmIntegration.vendorName(), llmIntegration);
+        }
+    }
+
+    public LLMIntegration getIntegrationService(String vendorName) {
+        return llmIntegrationMap.get(vendorName);
+    }
+
     public ModelMessage handleQuery(List<ModelMessage> context) {
         return handleWithRetry(context, 0);
     }
     private ModelMessage handleWithRetry(List<ModelMessage> context, int retryCount) {
-        return postProcessMessage(getModelMessage(queryLLM(context)), context, retryCount);
+        LLMIntegration llmIntegration;
+        if(retryCount == 0) {
+            llmIntegration = getIntegrationService(LLMIntegration.LLMVendors.LMStudio);
+        } else {
+            llmIntegration = getIntegrationService(LLMIntegration.LLMVendors.HFInference);
+        }
+        return postProcessMessage(getModelMessage(llmIntegration.queryLLM(context)), context, retryCount);
     }
 
     private ModelMessage postProcessMessage(ModelMessage aiResponse, List<ModelMessage> sessionHistory, int count) {
