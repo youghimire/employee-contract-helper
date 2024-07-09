@@ -20,6 +20,7 @@ import org.springframework.util.Assert;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -66,7 +67,6 @@ public class AgentControllerImpl implements AgentController {
             messageService.saveModelMessage(aiResponse, session);
             return new MessageDTO(aiResponse.getContent(), session.getId());
         }
-
     }
 
     private MessageDTO finalizeStageTwo(String appToken, ModelMessage aiResponse, Session session) {
@@ -75,12 +75,14 @@ public class AgentControllerImpl implements AgentController {
             Message message = messageService.getLastMessage(session.getId(), Session.STATUS.STAGE1);
             Assert.notNull(message, "Last response about General information did not found");
             GeneralInformation generalInformation = ValidateInformation.mapTo(message.getContent(), GeneralInformation.class);
-            String contractId = contractService.processFinalRequest(employmentInformation, generalInformation, appToken, session);
+            String contractId = contractService.processFinalRequest(employmentInformation, generalInformation, appToken, session.getContractId());
             log.info("Contract updated for contract Id {}", contractId);
+            session.setStatus(Session.STATUS.COMPLETED);
+            session = sessionService.saveSession(session);
             messageService.saveModelMessage(aiResponse, session);
-            return new MessageDTO("Successfully created Contract for this Employee. Thank you for your patience.", session.getId());
+            return new MessageDTO("Successfully completed Contract for this Employee. Thank you for your patience.", session.getId());
         } catch (Exception e) {
-            log.error("Error saving contract initial data ", e);
+            log.error("Error updating contract data ", e);
             session.setStatus(Session.STATUS.ERROR);
             session = sessionService.saveSession(session);
             return new MessageDTO("Error saving the provided information! Please try again.", session.getId());
@@ -136,6 +138,7 @@ public class AgentControllerImpl implements AgentController {
                 new ModelMessage(ModelMessage.ROLE.USER, "He will be working from %s".formatted(workCountryName)),
                 new ModelMessage(ModelMessage.ROLE.ASSISTANT, "Is the employee authorized to work from %s?".formatted(workCountryName)));
         if(isoWorkCountry.equals(generalInformation.getCountryOfCitizenISOAlpha2())) {
+            initialMessage = new ArrayList<>(initialMessage);
             initialMessage.add(new ModelMessage(ModelMessage.ROLE.USER, "Yes, he is authorized to work from %s.".formatted(workCountryName)));
             initialMessage.add(new ModelMessage(ModelMessage.ROLE.ASSISTANT, "What will be the standard weekly work hour of the employee?"));
         }
@@ -144,7 +147,7 @@ public class AgentControllerImpl implements AgentController {
         return new MessageDTO(("""
                 Thank you for your patience. General information of your employee saved to our platform successfully.\r
                 Now we need some additional information to complete the contract.\r
-                %s""").formatted(initialMessage.get(initialMessage.size() -1)), session.getId());
+                %s""").formatted(initialMessage.get(initialMessage.size() -1).getContent()), session.getId());
     }
 
     public List<ModelMessage> getSessionHistory(Session session) throws IOException {
