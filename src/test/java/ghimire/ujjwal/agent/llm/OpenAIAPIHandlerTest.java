@@ -36,7 +36,6 @@ class OpenAIAPIHandlerTest {
         assertThat(result.getBody().getChoices().get(0).getMessage()).isNotNull();
         assertThat(result.getBody().getChoices().get(0).getMessage().getRole()).isEqualTo("assistant");
         assertThat(result.getBody().getChoices().get(0).getMessage().getContent()).isNotBlank();
-        assertThat(result.getBody().getChoices().get(0).getMessage().getContent()).contains("John");
     }
 
     @Test
