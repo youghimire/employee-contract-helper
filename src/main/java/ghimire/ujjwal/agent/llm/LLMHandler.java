@@ -1,6 +1,6 @@
 package ghimire.ujjwal.agent.llm;
 
-import ghimire.ujjwal.agent.postProcess.PostProcessGeneralInformation;
+import ghimire.ujjwal.agent.postProcess.ValidateInformation;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +37,7 @@ public class LLMHandler {
     private ModelMessage handleWithRetry(List<ModelMessage> context, int retryCount) {
         LLMIntegration llmIntegration;
         if(retryCount == 0) {
-            llmIntegration = getIntegrationService(LLMIntegration.LLMVendors.LMStudio);
+            llmIntegration = getIntegrationService(LLMIntegration.LLMVendors.HFInference);
         } else {
             llmIntegration = getIntegrationService(LLMIntegration.LLMVendors.HFInference);
         }
@@ -46,8 +46,8 @@ public class LLMHandler {
 
     private ModelMessage postProcessMessage(ModelMessage aiResponse, List<ModelMessage> sessionHistory, int count) {
         log.debug("postProcessMessage message from assistant {}", aiResponse.getContent());
-        if(PostProcessGeneralInformation.doContainsJson(aiResponse.getContent())) {
-            Optional<String> validationError = PostProcessGeneralInformation.getValidationError(aiResponse.getContent());
+        if(ValidateInformation.doContainsJson(aiResponse.getContent())) {
+            Optional<String> validationError = ValidateInformation.validateGeneralInformation(aiResponse.getContent());
             if(validationError.isPresent()) {
                 if(count < 3) {
                     sessionHistory.add(aiResponse);

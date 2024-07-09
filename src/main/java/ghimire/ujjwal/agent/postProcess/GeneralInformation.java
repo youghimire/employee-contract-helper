@@ -7,7 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 
 @Data
 @NoArgsConstructor
-public class GeneralInformation implements EmployeeInformation{
+public class GeneralInformation{
     String firstName;
     String middleName;
     String lastName;

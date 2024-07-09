@@ -7,6 +7,7 @@ import ghimire.ujjwal.agent.llm.ModelMessage;
 import ghimire.ujjwal.agent.message.Message;
 import ghimire.ujjwal.agent.message.MessageService;
 import ghimire.ujjwal.agent.resources.dtos.MessageDTO;
+import ghimire.ujjwal.agent.session.Session;
 import ghimire.ujjwal.agent.session.SessionService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -45,9 +47,12 @@ class AgentControllerImplTest {
 
     void testProcessQuery() throws IOException {
         Long sessionId = 1L;
+        Session session = new Session();
+        session.setId(sessionId);
         final MessageDTO agentRequest = new MessageDTO("Can you reply Yes?", sessionId);
         AgentControllerImpl agentController = Mockito.spy(agentControllerImplUnderTest);
-        Mockito.doReturn(new ModelMessage("system", "provide quick response")).when(agentController).getInstruction();
+        Mockito.doReturn(new ModelMessage("system", "provide quick response")).when(agentController).getInstruction("src/main/resources/agent1.context.txt");
+        Mockito.when(sessionService.findById(sessionId)).thenReturn(Optional.of(session));
 
         final MessageDTO result = agentController.processQuery("appToken", agentRequest);
         assertThat(result.getSessionId()).isEqualTo(sessionId);

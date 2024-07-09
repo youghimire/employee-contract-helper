@@ -6,7 +6,7 @@ import ghimire.ujjwal.agent.llm.ModelMessage;
 import ghimire.ujjwal.agent.message.Message;
 import ghimire.ujjwal.agent.message.MessageService;
 import ghimire.ujjwal.agent.postProcess.GeneralInformation;
-import ghimire.ujjwal.agent.postProcess.PostProcessGeneralInformation;
+import ghimire.ujjwal.agent.postProcess.ValidateInformation;
 import ghimire.ujjwal.agent.resources.dtos.MessageDTO;
 import ghimire.ujjwal.agent.session.Session;
 import ghimire.ujjwal.agent.session.SessionService;
@@ -45,54 +45,76 @@ public class AgentControllerImpl implements AgentController {
 
     @Override
     public MessageDTO processQuery(String appToken, MessageDTO agentRequest) throws IOException {
-        Long sessionId = agentRequest.getSessionId();
-        if(sessionId == null) {
-            log.debug("Creating new session ");
-            sessionId = createNewSession(agentRequest);
+        Session session;
+        if(agentRequest.getSessionId() == null) {
+            return initiateFirstStage(agentRequest);
         }
-        List<ModelMessage> sessionHistory = getSessionHistory(sessionId);
+        session = sessionService.findById(agentRequest.getSessionId()).orElseThrow();
+        List<ModelMessage> sessionHistory = getSessionHistory(session.getId());
 
-        ModelMessage currentQuery = new ModelMessage("user", agentRequest.getContent());
-        messageService.saveModelMessages(List.of(currentQuery), sessionId);
-        sessionHistory.add(currentQuery);
+        addQuestionToContext(agentRequest, session, sessionHistory);
 
         ModelMessage aiResponse = mlHandler.handleQuery(sessionHistory);
 
-        if(PostProcessGeneralInformation.doContainsJson(aiResponse.getContent())) {
-            try {
-                String contractId = contractService.processInitialRequest(PostProcessGeneralInformation.mapTo(aiResponse.getContent(), GeneralInformation.class), appToken);
-                log.info("Contract saved with Id {}", contractId);
-                Session session = sessionService.findById(sessionId).orElseThrow();
-                session.setContractId(contractId);
-                sessionService.saveSession(session);
-                return new MessageDTO("First stage completed.", sessionId );
-            } catch (Exception e) {
-                log.error("Error saving contract initial data ", e);
-                return new MessageDTO("Error saving the provided information! Please try again.", sessionId );
-            }
+        if(ValidateInformation.doContainsJson(aiResponse.getContent())) {
+            return finalizeStageOne(appToken, aiResponse, session);
+        } else {
+            messageService.saveModelMessages(List.of(aiResponse), session.getId());
+            return new MessageDTO(aiResponse.getContent(), session.getId());
         }
-        messageService.saveModelMessages(List.of(aiResponse), sessionId);
-        return new MessageDTO(aiResponse.getContent(), sessionId);
+
     }
 
+    private void addQuestionToContext(MessageDTO agentRequest, Session session, List<ModelMessage> sessionHistory) {
+        ModelMessage currentQuery = new ModelMessage("user", agentRequest.getContent());
+        //May be hallucinating ask to force result
+        int STAGE1_FORCE_RESULT_AFTER = 12;
+        if(Session.STATUS.STAGE1.equals(session.getStatus()) && sessionHistory.size() > STAGE1_FORCE_RESULT_AFTER) {
+            currentQuery.setContent(currentQuery.getContent() + "; If you have all the information then please provide the Json response.");
+        }
+        messageService.saveModelMessages(List.of(currentQuery), session.getId());
+        sessionHistory.add(currentQuery);
+    }
 
+    private MessageDTO initiateFirstStage(MessageDTO agentRequest) {
+        Session session;
+        log.debug("Creating new session ");
+        session = sessionService.saveSession(new Session(agentRequest.getContent()));
+        List<Message> initialMessage = messageService.saveModelMessages(Collections.singletonList(new ModelMessage("assistant", "Can you provide me your employee name?")), session.getId());
+        return new MessageDTO(initialMessage.get(0).getContent(), session.getId());
+    }
 
-    private Long createNewSession(MessageDTO agentRequest) {
-        Session session = sessionService.saveSession(new Session(agentRequest.getContent()));
-        messageService.saveModelMessages(Collections.singletonList(new ModelMessage("assistant", "Can you provide me your employee name?")), session.getId());
-        return session.getId();
+    private MessageDTO finalizeStageOne(String appToken, ModelMessage aiResponse, Session session) {
+        try {
+            GeneralInformation generalInformation = ValidateInformation.mapTo(aiResponse.getContent(), GeneralInformation.class);
+            String contractId = contractService.processInitialRequest(generalInformation, appToken);
+            log.info("Contract saved with Id {}", contractId);
+            session.setContractId(contractId);
+            session.setStatus(Session.STATUS.STAGE2);
+            session = sessionService.saveSession(session);
+            return startSecondPhase(session, generalInformation);
+        } catch (Exception e) {
+            log.error("Error saving contract initial data ", e);
+            session.setStatus(Session.STATUS.ERROR);
+            session = sessionService.saveSession(session);
+            return new MessageDTO("Error saving the provided information! Please try again.", session.getId());
+        }
+    }
+
+    private MessageDTO startSecondPhase(Session session, GeneralInformation generalInformation) {
+        return new MessageDTO("Thank you for your assistance. First Stage completed successfully.", session.getId());
     }
 
     public List<ModelMessage> getSessionHistory(Long sessionId) throws IOException {
 
         List<Message> history = messageService.getAllMessage(sessionId);
         List<ModelMessage> modelMessages = history.stream().map(m -> new ModelMessage(m.getRole(), m.getContent())).collect(Collectors.toList());
-        modelMessages.add(0, getInstruction());
+        modelMessages.add(0, getInstruction("src/main/resources/agent1.context.txt"));
         return modelMessages;
     }
 
-    public ModelMessage getInstruction() throws IOException {
-        byte[] contextBArray = Files.readAllBytes(Paths.get("src/main/resources/agent1.context.txt"));
+    public ModelMessage getInstruction(String fileName) throws IOException {
+        byte[] contextBArray = Files.readAllBytes(Paths.get(fileName));
         return new ModelMessage("system", new String(contextBArray));
     }
 }
