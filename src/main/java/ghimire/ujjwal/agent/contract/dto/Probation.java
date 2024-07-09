@@ -1,6 +1,5 @@
 package ghimire.ujjwal.agent.contract.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

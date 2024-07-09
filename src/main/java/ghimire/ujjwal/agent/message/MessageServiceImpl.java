@@ -23,11 +23,6 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public Message saveMessage(Message message) {
-        return messageRepository.save(message);
-    }
-
-    @Override
     public Message saveModelMessage(ModelMessage modelMessage, Session session) {
         return messageRepository.save(new Message(modelMessage, session));
     }
@@ -36,11 +31,6 @@ public class MessageServiceImpl implements MessageService {
     public void saveModelMessages(List<ModelMessage> modelMessages, Session session) {
         List<Message> messages = modelMessages.stream().map(mm -> new Message(mm, session)).toList();
         messageRepository.saveAll(messages);
-    }
-
-    @Override
-    public void updateMessageStatus(Session session) {
-        messageRepository.updateMessageStatus(session.getId(), session.getStatus());
     }
 
     @Override
