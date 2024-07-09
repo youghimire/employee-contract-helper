@@ -1,6 +1,7 @@
 package ghimire.ujjwal.agent.llm;
 
 import ghimire.ujjwal.agent.llm.openai.dto.Choice;
+import ghimire.ujjwal.agent.session.Session;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,7 +39,7 @@ class AbstractMLHandlerTest {
 
         Mockito.when(integration.queryLLM(context)).thenReturn(ResponseEntity.ok(response));
 
-        final ModelMessage result = abstractMLHandlerUnderTest.handleQuery(new ArrayList<>());
+        final ModelMessage result = abstractMLHandlerUnderTest.handleQuery(new ArrayList<>(), new Session(""));
 
         assertThat(result).isEqualTo(message);
     }
@@ -53,7 +54,7 @@ class AbstractMLHandlerTest {
         final List<ModelMessage> sessionHistory = new ArrayList<>();
         Mockito.doReturn(ResponseEntity.ok(response)).when(integration).queryLLM(sessionHistory);
 
-        final ModelMessage result = handler.handleQuery(sessionHistory);
+        final ModelMessage result = handler.handleQuery(sessionHistory, new Session(""));
 
         assertThat(result.getContent()).isEqualTo("Can not process response. Please Try again.");
     }
@@ -70,7 +71,7 @@ class AbstractMLHandlerTest {
         final List<ModelMessage> sessionHistory = new ArrayList<>();
         Mockito.doReturn(ResponseEntity.ok(responseWithInvalidJSON), ResponseEntity.ok(responseWithText)).when(integration).queryLLM(sessionHistory);
 
-        final ModelMessage result = handler.handleQuery(sessionHistory);
+        final ModelMessage result = handler.handleQuery(sessionHistory, new Session("") );
 
         assertThat(result.getContent()).isEqualTo(responseWithText.getChoices().get(0).getMessage().getContent());
     }

@@ -9,7 +9,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class EmploymentInformation {
 
-    private String countryOfWorkISOAlpha2;
+    private String countryOfWork;
     private Boolean visaCompliance;
     private Integer workHourPerWeek;
     private LocalDate contractStartDate;
@@ -19,7 +19,7 @@ public class EmploymentInformation {
     private Integer probationPeriod;
     private Integer noticePeriodDuringProbation;
     private Integer noticePeriodAfterProbation;
-    private Long compensation;
+    private Double compensation;
 
     public interface EmploymentTerms {
         String DEFINITE = "Definite";

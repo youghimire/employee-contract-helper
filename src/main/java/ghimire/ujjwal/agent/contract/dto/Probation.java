@@ -6,8 +6,10 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class Probation {
+    public Probation(Integer value) {
+        this.value = value;
+    }
 
     private String noticePeriodMethod = "STANDARD";
     private Integer value;

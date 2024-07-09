@@ -61,7 +61,7 @@ class PostProcessGeneralInformationTest {
 
     @Test
     void testEmploymentInformation() {
-        final String validInfo = "{\"countryOfWorkISOAlpha2\":\"NP\", \"visaCompliance\":true, \"workHourPerWeek\":45, \"contractStartDate\":\"2024-09-15\", \"employmentTerms\":\"Indefinite\", \"contractEndDate\":\"\", \"timeOff\":12, \"probationPeriod\":30, \"noticePeriodDuringProbation\":45, \"noticePeriodAfterProbation\":45, \"compensation\":95000}";
+        final String validInfo = "{\"countryOfWork\":\"NP\", \"visaCompliance\":true, \"workHourPerWeek\":45, \"contractStartDate\":\"2024-09-15\", \"employmentTerms\":\"Indefinite\", \"contractEndDate\":\"\", \"timeOff\":12, \"probationPeriod\":30, \"noticePeriodDuringProbation\":45, \"noticePeriodAfterProbation\":45, \"compensation\":95000}";
         Optional<String> errorForNoCompliance = ValidateInformation.validateEmploymentInformation(validInfo);
         System.out.println(errorForNoCompliance);
         assertThat(errorForNoCompliance.isEmpty()).isTrue();

@@ -12,4 +12,10 @@ import lombok.ToString;
 public class ModelMessage {
     private String role;
     private String content;
+
+    public interface ROLE {
+        String ASSISTANT = "assistant";
+        String USER = "user";
+        String SYSTEM = "system";
+    }
 }

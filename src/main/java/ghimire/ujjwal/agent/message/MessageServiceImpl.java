@@ -1,6 +1,7 @@
 package ghimire.ujjwal.agent.message;
 
 import ghimire.ujjwal.agent.llm.ModelMessage;
+import ghimire.ujjwal.agent.session.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,8 +18,8 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public List<Message> getAllMessage(Long sessionId) {
-        return messageRepository.getAllBySessionId(sessionId);
+    public List<Message> getAllMessage(Session session) {
+        return messageRepository.getAllBySessionId(session.getId(), session.getStatus());
     }
 
     @Override
@@ -27,8 +28,23 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public List<Message> saveModelMessages(List<ModelMessage> modelMessages, Long sessionId) {
-        List<Message> messages = modelMessages.stream().map(mm -> new Message(mm, sessionId)).toList();
-        return messageRepository.saveAll(messages);
+    public Message saveModelMessage(ModelMessage modelMessage, Session session) {
+        return messageRepository.save(new Message(modelMessage, session));
+    }
+
+    @Override
+    public void saveModelMessages(List<ModelMessage> modelMessages, Session session) {
+        List<Message> messages = modelMessages.stream().map(mm -> new Message(mm, session)).toList();
+        messageRepository.saveAll(messages);
+    }
+
+    @Override
+    public void updateMessageStatus(Session session) {
+        messageRepository.updateMessageStatus(session.getId(), session.getStatus());
+    }
+
+    @Override
+    public Message getLastMessage(Long sessionId, String status) {
+        return messageRepository.getLastMessage(sessionId, status);
     }
 }

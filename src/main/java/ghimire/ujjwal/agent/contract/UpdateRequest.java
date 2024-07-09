@@ -2,22 +2,34 @@ package ghimire.ujjwal.agent.contract;
 
 import ghimire.ujjwal.agent.contract.dto.CountryISO;
 import ghimire.ujjwal.agent.contract.dto.NoticePeriod;
+import ghimire.ujjwal.agent.contract.dto.Probation;
+import ghimire.ujjwal.agent.postProcess.EmploymentInformation;
 import ghimire.ujjwal.agent.postProcess.GeneralInformation;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.format.DateTimeFormatter;
+
 @Data
 @NoArgsConstructor
 public class UpdateRequest {
-    public UpdateRequest(GeneralInformation generalInformation) {
-        contractTitle = generalInformation.getFullName();
+    public UpdateRequest(GeneralInformation generalInformation, EmploymentInformation employmentInformation) {
+        contractTitle = "%s - %s".formatted(generalInformation.getFullName(), generalInformation.getJobTitle());
         employeeFirstName = generalInformation.getFirstName();
+        employeeMiddleName = generalInformation.getMiddleName();
         employeeLastName = generalInformation.getLastName();
         employeeEmail = generalInformation.getEmail();
         jobTitle = generalInformation.getJobTitle();
         scopeOfWork = generalInformation.getScopeOfWork();
         workLocationCountry = new CountryISO(generalInformation.getCountryOfWorkISOAlpha2());
         countryOfCitizenship = new CountryISO(generalInformation.getCountryOfCitizenISOAlpha2());
+
+        workHoursPerWeek = employmentInformation.getWorkHourPerWeek();
+        compensationAmount = employmentInformation.getCompensation();
+        contractStartDate = employmentInformation.getContractStartDate().format(DateTimeFormatter.ISO_LOCAL_DATE);
+        probationPeriod = employmentInformation.getProbationPeriod();
+        timeOffDays = employmentInformation.getTimeOff();
+        noticePeriod = new NoticePeriod(new Probation(employmentInformation.getNoticePeriodDuringProbation()), new Probation(employmentInformation.getNoticePeriodAfterProbation()));
     }
 
     String contractType = "EOR";

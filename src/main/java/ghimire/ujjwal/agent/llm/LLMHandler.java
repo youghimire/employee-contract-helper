@@ -1,6 +1,7 @@
 package ghimire.ujjwal.agent.llm;
 
 import ghimire.ujjwal.agent.postProcess.ValidateInformation;
+import ghimire.ujjwal.agent.session.Session;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,28 +32,30 @@ public class LLMHandler {
         return llmIntegrationMap.get(vendorName);
     }
 
-    public ModelMessage handleQuery(List<ModelMessage> context) {
-        return handleWithRetry(context, 0);
+    public ModelMessage handleQuery(List<ModelMessage> context, Session session) {
+        return handleWithRetry(context, session, 0);
     }
-    private ModelMessage handleWithRetry(List<ModelMessage> context, int retryCount) {
+    private ModelMessage handleWithRetry(List<ModelMessage> context, Session session, int retryCount) {
         LLMIntegration llmIntegration;
         if(retryCount == 0) {
             llmIntegration = getIntegrationService(LLMIntegration.LLMVendors.HFInference);
         } else {
             llmIntegration = getIntegrationService(LLMIntegration.LLMVendors.HFInference);
         }
-        return postProcessMessage(getModelMessage(llmIntegration.queryLLM(context)), context, retryCount);
+        return postProcessMessage(getModelMessage(llmIntegration.queryLLM(context)), context, session, retryCount);
     }
 
-    private ModelMessage postProcessMessage(ModelMessage aiResponse, List<ModelMessage> sessionHistory, int count) {
+    private ModelMessage postProcessMessage(ModelMessage aiResponse, List<ModelMessage> sessionHistory, Session session, int count) {
         log.debug("postProcessMessage message from assistant {}", aiResponse.getContent());
         if(ValidateInformation.doContainsJson(aiResponse.getContent())) {
-            Optional<String> validationError = ValidateInformation.validateGeneralInformation(aiResponse.getContent());
+            Optional<String> validationError = Session.STATUS.STAGE1.equals(session.getStatus()) ?
+                    ValidateInformation.validateGeneralInformation(aiResponse.getContent()) :
+                    ValidateInformation.validateEmploymentInformation(aiResponse.getContent());
             if(validationError.isPresent()) {
                 if(count < 3) {
                     sessionHistory.add(aiResponse);
-                    sessionHistory.add(new ModelMessage("user", "Last json response contains error: %s \nPlease re-generate a valid JSON response or if you do not have information then ask for that information.".formatted(validationError.get())));
-                    return handleWithRetry(sessionHistory, count+1);
+                    sessionHistory.add(new ModelMessage("user", "Last json response contains error: %s \nPlease re-generate a valid JSON response or if you do not have information then ask user for that information. Either provide a valid json or a specific question".formatted(validationError.get())));
+                    return handleWithRetry(sessionHistory, session, count+1);
                 }else {
                     return new ModelMessage("assistant", "Can not process response. Please Try again.");
                 }

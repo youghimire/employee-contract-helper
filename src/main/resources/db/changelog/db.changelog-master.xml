@@ -42,4 +42,10 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="1720529797372-1" author="ujjwal">
+        <addColumn tableName="messages">
+            <column name="status" type="text"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

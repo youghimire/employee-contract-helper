@@ -38,23 +38,42 @@ class AgentControllerImplTest {
     private AgentControllerImpl agentControllerImplUnderTest;
 
     @Test
-    void testMockLLM() throws IOException {
-        agentControllerImplUnderTest = new AgentControllerImpl(mlHandler, messageService, sessionService, contractService);
-        when(mlHandler.handleQuery(anyList())).thenReturn(new ModelMessage("assistant", "Yes it is."));
-
-        testProcessQuery();
-    }
-
-    void testProcessQuery() throws IOException {
+    void testProcessQueryNormal() throws IOException {
         Long sessionId = 1L;
         Session session = new Session();
         session.setId(sessionId);
-        final MessageDTO agentRequest = new MessageDTO("Can you reply Yes?", sessionId);
+
+        agentControllerImplUnderTest = new AgentControllerImpl(mlHandler, messageService, sessionService, contractService);
+        when(mlHandler.handleQuery(anyList(), Mockito.any(Session.class) )).thenReturn(new ModelMessage("assistant", "Yes it is."));
         AgentControllerImpl agentController = Mockito.spy(agentControllerImplUnderTest);
-        Mockito.doReturn(new ModelMessage("system", "provide quick response")).when(agentController).getInstruction("src/main/resources/agent1.context.txt");
+        Mockito.doReturn(new ModelMessage("system", "provide quick response")).when(agentController).getInstruction(Mockito.anyString());
         Mockito.when(sessionService.findById(sessionId)).thenReturn(Optional.of(session));
 
+        final MessageDTO agentRequest = new MessageDTO("Can you reply Yes?", sessionId);
+
         final MessageDTO result = agentController.processQuery("appToken", agentRequest);
+
+        assertThat(result.getSessionId()).isEqualTo(sessionId);
+        assertThat(result.getContent()).isNotBlank();
+        assertThat(result.getContent()).contains("Yes");
+    }
+
+    @Test
+    void testProcessQueryJSON() throws IOException {
+        Long sessionId = 1L;
+        Session session = new Session();
+        session.setId(sessionId);
+
+        agentControllerImplUnderTest = new AgentControllerImpl(mlHandler, messageService, sessionService, contractService);
+        when(mlHandler.handleQuery(anyList(), Mockito.any(Session.class) )).thenReturn(new ModelMessage("assistant", "Yes it is."));
+        AgentControllerImpl agentController = Mockito.spy(agentControllerImplUnderTest);
+        Mockito.doReturn(new ModelMessage("system", "provide quick response")).when(agentController).getInstruction(Mockito.anyString());
+        Mockito.when(sessionService.findById(sessionId)).thenReturn(Optional.of(session));
+
+        final MessageDTO agentRequest = new MessageDTO("Can you reply Yes?", sessionId);
+
+        final MessageDTO result = agentController.processQuery("appToken", agentRequest);
+
         assertThat(result.getSessionId()).isEqualTo(sessionId);
         assertThat(result.getContent()).isNotBlank();
         assertThat(result.getContent()).contains("Yes");
@@ -63,10 +82,12 @@ class AgentControllerImplTest {
     @Test
     void testGetContext() throws IOException {
         Long sessionId = 1L;
-        List<Message> history = List.of(new Message(new ModelMessage("assistant", "what is the employee name?"), sessionId));
-        when(messageService.getAllMessage(sessionId)).thenReturn(history);
+        Session session = new Session();
+        session.setId(sessionId);
+        List<Message> history = List.of(new Message(new ModelMessage("assistant", "what is the employee name?"), session));
+        when(messageService.getAllMessage(session)).thenReturn(history);
         agentControllerImplUnderTest = new AgentControllerImpl(mlHandler, messageService, sessionService, contractService);
 
-        assertThat(agentControllerImplUnderTest.getSessionHistory(sessionId).size()).isEqualTo(history.size() + 1);
+        assertThat(agentControllerImplUnderTest.getSessionHistory(session).size()).isEqualTo(history.size() + 1);
     }
 }

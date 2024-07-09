@@ -12,8 +12,8 @@ import java.time.LocalDateTime;
 public class Session {
 
     public interface STATUS {
-        String STAGE1 = "ACTIVE";
-        String STAGE2 = "IN_PROGRESS";
+        String STAGE1 = "STAGE1";
+        String STAGE2 = "STAGE2";
         String ERROR = "ERROR";
         String COMPLETED = "COMPLETED";
         String DELETED = "DELETED";

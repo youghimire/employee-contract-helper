@@ -15,5 +15,5 @@ Ask employer following information about their employee :
 
 Ask one information at a time. Do not guess any value.
 Once you have all correct value then return those information in json format below with value extracted from provided data
-{\"countryOfWorkISOAlpha2\":\"\", \"visaCompliance\":, \"workHourPerWeek\":, \"contractStartDate\":\"\", \"employmentTerms\":\"\", \"contractEndDate\":\"\", \"timeOff\":, \"probationPeriod\":, \"noticePeriodDuringProbation\":, \"noticePeriodAfterProbation\":, \"compensation\":}
-example : {\"countryOfWorkISOAlpha2\":\"NP\", \"visaCompliance\":true, \"workHourPerWeek\":45, \"contractStartDate\":\"2024-09-15\", \"employmentTerms\":\"Indefinite\", \"contractEndDate\":\"\", \"timeOff\":12, \"probationPeriod\":30, \"noticePeriodDuringProbation\":45, \"noticePeriodAfterProbation\":45, \"compensation\":95000}
+{\"countryOfWork\":\"\", \"visaCompliance\":, \"workHourPerWeek\":, \"contractStartDate\":\"\", \"employmentTerms\":\"\", \"contractEndDate\":\"\", \"timeOff\":, \"probationPeriod\":, \"noticePeriodDuringProbation\":, \"noticePeriodAfterProbation\":, \"compensation\":}
+example : {\"countryOfWork\":\"Japan\", \"visaCompliance\":true, \"workHourPerWeek\":45, \"contractStartDate\":\"2024-09-15\", \"employmentTerms\":\"Indefinite\", \"contractEndDate\":\"\", \"timeOff\":12, \"probationPeriod\":30, \"noticePeriodDuringProbation\":45, \"noticePeriodAfterProbation\":45, \"compensation\":95000}

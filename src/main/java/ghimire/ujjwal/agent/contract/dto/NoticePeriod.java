@@ -6,8 +6,11 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class NoticePeriod {
+    public NoticePeriod(Probation duringProbation, Probation afterProbation) {
+        this.duringProbation = duringProbation;
+        this.afterProbation = afterProbation;
+    }
 
     private String periodType = "CUSTOM";
     private Probation afterProbation;

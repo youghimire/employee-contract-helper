@@ -42,7 +42,7 @@ public class HuggingFaceIntegration implements LLMIntegration {
         headers.set("Authorization", "Bearer " + HFToken);
         HttpEntity<HFRequest> entity = new HttpEntity<>(new HFRequest(HFModel, context, new Parameters(0D), 250L, Boolean.FALSE), headers);
         String url = "%s%s/v1/chat/completions".formatted(HFApiURL, HFModel);
-        log.debug("Asking to LLM with question {} context size {} \n URL {}", context.isEmpty() ? "" : context.get(context.size()-1), context.size(), url);
+        log.debug("Asking to LLM with question {} context size {} \n URL {}", context, context.size(), url);
         ResponseEntity<ChatCompletionResponse> responseEntity = restTemplate.exchange(url, HttpMethod.POST, entity, ChatCompletionResponse.class);
         if(responseEntity.getStatusCode().is5xxServerError()) {
             try {

@@ -14,12 +14,13 @@ import java.time.LocalDateTime;
 @Table(name = "messages")
 public class Message {
 
-    public Message(ModelMessage modelMessage, Long sessionId) {
-        session = new Session();
-        session.setId(sessionId);
+    public Message(ModelMessage modelMessage, Session session) {
+        this.session = new Session();
+        this.session.setId(session.getId());
         created = LocalDateTime.now();
         role = modelMessage.getRole();
         content = modelMessage.getContent();
+        status = session.getStatus();
     }
     @Id
     @GeneratedValue(generator="message_seq", strategy = GenerationType.SEQUENCE)
@@ -38,5 +39,8 @@ public class Message {
 
     @Column
     String content;
+
+    @Column
+    String status;
 
 }

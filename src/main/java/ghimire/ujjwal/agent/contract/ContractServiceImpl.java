@@ -1,8 +1,9 @@
 package ghimire.ujjwal.agent.contract;
 
+import ghimire.ujjwal.agent.postProcess.EmploymentInformation;
 import ghimire.ujjwal.agent.postProcess.GeneralInformation;
+import ghimire.ujjwal.agent.session.Session;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.tomcat.util.json.JSONParser;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +34,17 @@ public class ContractServiceImpl implements ContractService{
         Assert.isTrue(StringUtils.isNotBlank(response.getBody()), "Request to Contract create API failed.");
         return getContractId(response);
 
+    }
+
+    @Override
+    public String processFinalRequest(EmploymentInformation employmentInformation, GeneralInformation generalInformation, String appToken, Session session) {
+        HttpHeaders headers = createHeader(appToken);
+        log.debug("Sending final employee information to Contract API {}", employmentInformation);
+        HttpEntity<UpdateRequest> entity = new HttpEntity<>(new UpdateRequest(generalInformation, employmentInformation), headers);
+        ResponseEntity<String> response = restTemplate.exchange("%s/%s".formatted(URL, session.getContractId()), HttpMethod.PATCH, entity, String.class);
+        Assert.isTrue(response.getStatusCode().is2xxSuccessful(), "Request to Contract create API failed.");
+        Assert.isTrue(StringUtils.isNotBlank(response.getBody()), "Request to Contract create API failed.");
+        return getContractId(response);
     }
 
     private HttpHeaders createHeader(String token) {
