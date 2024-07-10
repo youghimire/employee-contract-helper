@@ -3,9 +3,12 @@ package ghimire.ujjwal.agent.message;
 import ghimire.ujjwal.agent.llm.ModelMessage;
 import ghimire.ujjwal.agent.session.Session;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class MessageServiceImpl implements MessageService {
@@ -34,7 +37,8 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public Message getLastMessage(Long sessionId, String status) {
-        return messageRepository.getLastMessage(sessionId, status);
+    public Optional<Message> getLastMessage(Long sessionId, String status) {
+        PageRequest pageRequest = PageRequest.of(0, 1, Sort.by(Sort.Direction.DESC, "created"));
+        return messageRepository.getLastMessage(sessionId, status, pageRequest).stream().findFirst();
     }
 }

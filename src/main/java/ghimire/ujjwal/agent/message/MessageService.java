@@ -4,6 +4,7 @@ import ghimire.ujjwal.agent.llm.ModelMessage;
 import ghimire.ujjwal.agent.session.Session;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface MessageService {
     List<Message> getAllMessage(Session session);
@@ -11,5 +12,5 @@ public interface MessageService {
     Message saveModelMessage(ModelMessage modelMessage, Session session);
     void saveModelMessages(List<ModelMessage> modelMessages, Session session);
 
-    Message getLastMessage(Long sessionId, String status);
+    Optional<Message> getLastMessage(Long sessionId, String status);
 }
