@@ -17,4 +17,4 @@ assistant: what's his job title
 user: Office assistant
 assistant: provide some Smith's scope of work
 user: a scope of work \r\n provide office assistant \r\n help customer
-assistant: {\"firstName\":\"Smith\", \"middleName\":\"\", \"lastName\":\"Flint\", \"email\":\"smith@gmail.com\", \"countryOfCitizenISOAlpha2\":\"IN\", \"countryOfWorkISOAlpha2\":\"US\", \"jobTitle\":\"Office assistant\", \"scopeOfWork\":\"a scope of work \\r\\n provide office assistant \\r\\n help customer \"}
+assistant: {\"firstName\":\"Smith\", \"middleName\":\"\", \"lastName\":\"Flint\", \"email\":\"smith@gmail.com\", \"countryOfCitizenISOAlpha2\":\"IN\", \"countryOfWorkISOAlpha2\":\"US\", \"jobTitle\":\"Office assistant\", \"scopeOfWork\":\"a scope of work \\n provide office assistant \\n help customer \"}

@@ -1,0 +1,18 @@
+spring.application.name=agent
+
+lmstudio.url=http://localhost:1234/v1/chat/completions
+
+huggingface.token=<HF Token>
+huggingface.url=https://api-inference.huggingface.co/models/
+huggingface.model=microsoft/Phi-3-mini-4k-instruct
+
+spring.datasource.url= jdbc:postgresql://host.docker.internal:5432/agent
+spring.datasource.username= agent
+spring.datasource.password= <password of DB>
+
+logging.level.com=INFO
+logging.level.ghimire=TRACE
+
+spring.liquibase.change-log=db/changelog/db.changelog-master.xml
+
+contract.post.url=<External URL>
