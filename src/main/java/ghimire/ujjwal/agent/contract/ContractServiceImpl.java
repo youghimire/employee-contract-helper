@@ -8,10 +8,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
 import java.util.List;
 
 @Service
@@ -21,28 +25,45 @@ public class ContractServiceImpl implements ContractService{
     @Value("${contract.post.url}")
     private String URL;
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    private static final RestTemplate restTemplate = new RestTemplate();
+    static {
+        restTemplate.setErrorHandler(new HandleNiuralError());
+        restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
+    }
 
     @Override
     public String processInitialRequest(GeneralInformation generalInformation, String token) {
         HttpHeaders headers = createHeader(token);
-        log.debug("Sending initial employee information to Contract API {}", generalInformation);
+        log.info("Sending initial employee information to Contract API {}", generalInformation);
         HttpEntity<InitialRequest> entity = new HttpEntity<>(new InitialRequest(generalInformation), headers);
         ResponseEntity<String> response = restTemplate.exchange(URL, HttpMethod.POST, entity, String.class);
-        Assert.isTrue(response.getStatusCode().is2xxSuccessful(), "Request to Contract create API failed.");
         Assert.isTrue(StringUtils.isNotBlank(response.getBody()), "Request to Contract create API failed.");
+        log.info("Response from Niural for initial request {}", response.getBody());
+        Assert.isTrue(response.getStatusCode().is2xxSuccessful(), "Request to Contract create API failed.");
         return getContractId(response);
 
+    }
+
+    public static class HandleNiuralError extends DefaultResponseErrorHandler {
+        @Override
+        public void handleError(ClientHttpResponse response) throws IOException {
+            HttpStatusCode statusCode = response.getStatusCode();
+            String errorMessage = "Niural returned error %s: %s".formatted(statusCode, response.getStatusText());
+            log.error(errorMessage);
+        }
     }
 
     @Override
     public String processFinalRequest(EmploymentInformation employmentInformation, GeneralInformation generalInformation, String appToken, String contractId) {
         HttpHeaders headers = createHeader(appToken);
-        log.debug("Sending final employee information to Contract API {}", employmentInformation);
+        log.info("Sending final employee information to Contract API {}", employmentInformation);
         HttpEntity<UpdateRequest> entity = new HttpEntity<>(new UpdateRequest(generalInformation, employmentInformation), headers);
-        ResponseEntity<String> response = restTemplate.exchange("%s/%s".formatted(URL, contractId), HttpMethod.PATCH, entity, String.class);
-        Assert.isTrue(response.getStatusCode().is2xxSuccessful(), "Request to Contract create API failed.");
+        String requestUrl = "%s/%s".formatted(URL, contractId);
+        log.info("Request URL {}", requestUrl);
+        ResponseEntity<String> response = restTemplate.exchange(requestUrl, HttpMethod.PATCH, entity, String.class);
         Assert.isTrue(StringUtils.isNotBlank(response.getBody()), "Request to Contract create API failed.");
+        log.info("Response from Niural for update request {}", response.getBody());
+        Assert.isTrue(response.getStatusCode().is2xxSuccessful(), "Request to Contract create API failed.");
         return getContractId(response);
     }
 

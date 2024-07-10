@@ -26,7 +26,7 @@ public class UpdateRequest {
 
         workHoursPerWeek = employmentInformation.getWorkHourPerWeek();
         compensationAmount = employmentInformation.getCompensation();
-        contractStartDate = employmentInformation.getContractStartDate().format(DateTimeFormatter.ISO_LOCAL_DATE);
+        contractStartDate = employmentInformation.getContractStartDate() != null ? employmentInformation.getContractStartDate().format(DateTimeFormatter.ISO_LOCAL_DATE) : "";
         probationPeriod = employmentInformation.getProbationPeriod();
         timeOffDays = employmentInformation.getTimeOff();
         noticePeriod = new NoticePeriod(new Probation(employmentInformation.getNoticePeriodDuringProbation()), new Probation(employmentInformation.getNoticePeriodAfterProbation()));
