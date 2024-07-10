@@ -31,12 +31,6 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public void saveModelMessages(List<ModelMessage> modelMessages, Session session) {
-        List<Message> messages = modelMessages.stream().map(mm -> new Message(mm, session)).toList();
-        messageRepository.saveAll(messages);
-    }
-
-    @Override
     public Optional<Message> getLastMessage(Long sessionId, String status) {
         PageRequest pageRequest = PageRequest.of(0, 1, Sort.by(Sort.Direction.DESC, "created"));
         return messageRepository.getLastMessage(sessionId, status, pageRequest).stream().findFirst();
