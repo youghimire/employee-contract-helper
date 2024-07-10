@@ -17,6 +17,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -103,7 +104,7 @@ class AgentControllerImplTest {
         Mockito.when(sessionService.findById(session.getId())).thenReturn(Optional.of(session));
         Mockito.when(sessionService.saveSession(Mockito.any(Session.class))).thenAnswer(i -> i.getArguments()[0]);
         when(mlHandler.handleQuery(anyList(), Mockito.any(Session.class) )).thenReturn(new ModelMessage("assistant", "{\"countryOfWork\":\"Japan\", \"visaCompliance\":true, \"workHourPerWeek\":45, \"contractStartDate\":\"2024-09-15\", \"employmentTerms\":\"Indefinite\", \"contractEndDate\":\"\", \"timeOff\":12, \"probationPeriod\":30, \"noticePeriodDuringProbation\":45, \"noticePeriodAfterProbation\":45, \"compensation\":95000}"));
-        when(messageService.getLastMessage(Mockito.anyLong(), Mockito.anyString())).thenReturn(new Message(stageOneFinal, session));
+        when(messageService.getLastMessage(Mockito.anyLong(), Mockito.anyString())).thenReturn(Optional.of(new Message(stageOneFinal, session)));
         final MessageDTO agentRequest = new MessageDTO("Provide JSON?", session.getId());
 
         final MessageDTO result = agentControllerImplUnderTest.processQuery("appToken", agentRequest);
@@ -111,6 +112,24 @@ class AgentControllerImplTest {
         assertThat(result.getSessionId()).isEqualTo(session.getId());
         assertThat(result.getContent()).isNotBlank();
         assertThat(result.getContent()).isEqualTo("Successfully completed Contract for this Employee. Thank you for your patience.");
+    }
+
+    @Test
+    void testForceResult() throws IOException {
+        Session session = getSession();
+        Mockito.when(sessionService.findById(session.getId())).thenReturn(Optional.of(session));
+        final MessageDTO agentRequest = new MessageDTO("Provide JSON?", session.getId());
+        Message m = new Message(new ModelMessage(ModelMessage.ROLE.USER, "user Question"), session);
+        List<Message> context = Collections.nCopies(15, m);
+        Mockito.when(messageService.getAllMessage(session)).thenReturn(context);
+        when(mlHandler.handleQuery(anyList(), Mockito.any(Session.class) )).thenReturn(new ModelMessage("assistant", "some response"));
+
+        final MessageDTO result = agentControllerImplUnderTest.processQuery("appToken", agentRequest);
+
+        assertThat(result.getSessionId()).isEqualTo(session.getId());
+        assertThat(result.getContent()).isNotBlank();
+        assertThat(agentRequest.getContent()).startsWith("Provide JSON?");
+        assertThat(agentRequest.getContent()).endsWith("other-wise ask the user about specific information needed.");
     }
 
     @Test

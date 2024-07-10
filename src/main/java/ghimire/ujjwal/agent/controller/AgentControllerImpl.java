@@ -20,9 +20,8 @@ import org.springframework.util.Assert;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -72,15 +71,19 @@ public class AgentControllerImpl implements AgentController {
     private MessageDTO finalizeStageTwo(String appToken, ModelMessage aiResponse, Session session) {
         try {
             EmploymentInformation employmentInformation = ValidateInformation.mapTo(aiResponse.getContent(), EmploymentInformation.class);
-            Message message = messageService.getLastMessage(session.getId(), Session.STATUS.STAGE1);
-            Assert.notNull(message, "Last response about General information did not found");
-            GeneralInformation generalInformation = ValidateInformation.mapTo(message.getContent(), GeneralInformation.class);
+            Optional<Message> message = messageService.getLastMessage(session.getId(), Session.STATUS.STAGE1);
+            Assert.isTrue(message.isPresent(), "Last response about General information did not found");
+            GeneralInformation generalInformation = ValidateInformation.mapTo(message.get().getContent(), GeneralInformation.class);
             String contractId = contractService.processFinalRequest(employmentInformation, generalInformation, appToken, session.getContractId());
             log.info("Contract updated for contract Id {}", contractId);
             session.setStatus(Session.STATUS.COMPLETED);
             session = sessionService.saveSession(session);
             messageService.saveModelMessage(aiResponse, session);
-            return new MessageDTO("Successfully completed Contract for this Employee. Thank you for your patience.", session.getId());
+            if(employmentInformation.getVisaCompliance()) {
+                return new MessageDTO("Successfully completed Contract for this Employee. Thank you for your patience.", session.getId());
+            } else {
+                return new MessageDTO("Got it. We saved the basic information about the employee.\nFor further processing someone from Niural will reach out to you in 2-3 working days to discuss details about visa processing for the employee.\nThank you.", session.getId());
+            }
         } catch (Exception e) {
             log.error("Error updating contract data ", e);
             session.setStatus(Session.STATUS.ERROR);
@@ -89,16 +92,16 @@ public class AgentControllerImpl implements AgentController {
         }
     }
 
+    private static final String FORCE_LLM_FOR_RESULT = "If you got all the necessary information from user to create json then provide the Json result; other-wise ask the user about specific information needed.";
     private void checkContextSizeThenAddQuestion(MessageDTO agentRequest, Session session, List<ModelMessage> sessionHistory) {
-        String question = agentRequest.getContent();
         //If the interaction is larger than expected then ask to force result
-        int STAGE1_FORCE_RESULT_AFTER = 12;
+        int STAGE1_FORCE_RESULT_AFTER = 14;
         int STAGE2_FORCE_RESULT_AFTER = 24;
         if((Session.STATUS.STAGE1.equals(session.getStatus()) && sessionHistory.size() > STAGE1_FORCE_RESULT_AFTER)
         || Session.STATUS.STAGE2.equals(session.getStatus()) && sessionHistory.size() > STAGE2_FORCE_RESULT_AFTER) {
-            question += "\r\nIf you got all the necessary information from user to create json then provide the Json result; other-wise ask the user about specific information needed.";
+            agentRequest.setContent("%s\n%s".formatted(agentRequest.getContent(), FORCE_LLM_FOR_RESULT));
         }
-        ModelMessage currentQuery = new ModelMessage(ModelMessage.ROLE.USER, question);
+        ModelMessage currentQuery = new ModelMessage(ModelMessage.ROLE.USER, agentRequest.getContent());
         messageService.saveModelMessage(currentQuery, session);
         sessionHistory.add(currentQuery);
     }
@@ -107,6 +110,7 @@ public class AgentControllerImpl implements AgentController {
         Session session;
         log.debug("Creating new session ");
         session = sessionService.saveSession(new Session(agentRequest.getContent()));
+        messageService.saveModelMessage(new ModelMessage(ModelMessage.ROLE.USER, agentRequest.getContent()), session);
         Message initialMessage = messageService.saveModelMessage(new ModelMessage(ModelMessage.ROLE.ASSISTANT, "Can you provide me your employee name?"), session);
         return new MessageDTO(initialMessage.getContent(), session.getId());
     }
@@ -133,21 +137,15 @@ public class AgentControllerImpl implements AgentController {
 
         String isoWorkCountry = generalInformation.getCountryOfWorkISOAlpha2();
         String workCountryName = ValidateInformation.getCountryName(isoWorkCountry);
-        List<ModelMessage> initialMessage = Arrays.asList(
-                new ModelMessage(ModelMessage.ROLE.ASSISTANT, "Can you provide me your employee's work country?"),
-                new ModelMessage(ModelMessage.ROLE.USER, "He will be working from %s".formatted(workCountryName)),
-                new ModelMessage(ModelMessage.ROLE.ASSISTANT, "Is the employee authorized to work from %s?".formatted(workCountryName)));
+        messageService.saveModelMessage(new ModelMessage(ModelMessage.ROLE.ASSISTANT, "Can you provide me your employee's work country?"), session);
+        messageService.saveModelMessage(new ModelMessage(ModelMessage.ROLE.USER, "He will be working from %s".formatted(workCountryName)), session);
+        Message lastmessage = messageService.saveModelMessage(new ModelMessage(ModelMessage.ROLE.ASSISTANT, "Is the employee authorized to work from %s?".formatted(workCountryName)), session);
         if(isoWorkCountry.equals(generalInformation.getCountryOfCitizenISOAlpha2())) {
-            initialMessage = new ArrayList<>(initialMessage);
-            initialMessage.add(new ModelMessage(ModelMessage.ROLE.USER, "Yes, he is authorized to work from %s.".formatted(workCountryName)));
-            initialMessage.add(new ModelMessage(ModelMessage.ROLE.ASSISTANT, "What will be the standard weekly work hour of the employee?"));
+            messageService.saveModelMessage(new ModelMessage(ModelMessage.ROLE.USER, "Yes, he is authorized to work from %s.".formatted(workCountryName)), session);
+            lastmessage = messageService.saveModelMessage(new ModelMessage(ModelMessage.ROLE.ASSISTANT, "What will be the standard weekly work hour of the employee?"), session);
         }
-        messageService.saveModelMessages(initialMessage, session);
 
-        return new MessageDTO(("""
-                Thank you for your patience. General information of your employee saved to our platform successfully.\r
-                Now we need some additional information to complete the contract.\r
-                %s""").formatted(initialMessage.get(initialMessage.size() -1).getContent()), session.getId());
+        return new MessageDTO(("Thank you for your patience. General information of your employee saved to our platform successfully.\nNow we need some additional information to complete the contract.\n%s").formatted(lastmessage.getContent()), session.getId());
     }
 
     public List<ModelMessage> getSessionHistory(Session session) throws IOException {
