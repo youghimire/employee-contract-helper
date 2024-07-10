@@ -28,7 +28,11 @@ Service classes
 - HuggingFace and OpenAPI integrations
 - Instructions are on two files at src/main/resources for two sections
 
+Screen recording of the ask API
+with no visa permit https://drive.google.com/file/d/1z0t8G8sSuICcpIeCD29WJSWqrNvTb8eZ/view?usp=sharing
+With visa permit https://drive.google.com/file/d/1XfNJOS9EOnabespS5E_mZDpK1z5HRol5/view?usp=sharing
 
-
+The POST API /api/agent/ask should contain auth-token Header with Niural API Token
+First Message format {"content": "session title"} return the sessionId and every other request should contain that sessionId
 
 ![alt text](https://github.com/youghimire/employee-contract-helper/blob/main/Agent_eor.jpg)
