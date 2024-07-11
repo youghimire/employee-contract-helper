@@ -62,7 +62,7 @@ public class ValidateInformation {
         try {
             EmploymentInformation info = mapTo(content, EmploymentInformation.class);
             if(!info.getVisaCompliance()) return Optional.empty();
-            Assert.isTrue(info.getWorkHourPerWeek() > 40 && info.getWorkHourPerWeek() < 60, "Work hour must be between 40 to 60");
+            Assert.isTrue(info.getWorkHourPerWeek() >= 40 && info.getWorkHourPerWeek() <= 60, "Work hour must be between 40 to 60");
             Assert.notNull(info.getContractStartDate(), "Contract start date can not be empty");
             Assert.isTrue(info.getContractStartDate().isAfter(LocalDate.now().plusDays(4)), "Contract start date should be at least 5 days ahead from today’s date");
             Assert.isTrue(List.of(EmploymentInformation.EmploymentTerms.DEFINITE, EmploymentInformation.EmploymentTerms.INDEFINITE).contains(info.getEmploymentTerms()), "Employment terms can be either Definite or Indefinite");
