@@ -74,8 +74,8 @@ public class AgentControllerImpl implements AgentController {
             Optional<Message> message = messageService.getLastMessage(session.getId(), Session.STATUS.STAGE1);
             Assert.isTrue(message.isPresent(), "Last response about General information did not found");
             GeneralInformation generalInformation = ValidateInformation.mapTo(message.get().getContent(), GeneralInformation.class);
-            String contractId = contractService.processFinalRequest(employmentInformation, generalInformation, appToken, session.getContractId());
-            log.info("Contract updated for contract Id {}", contractId);
+            session = contractService.processFinalRequest(employmentInformation, generalInformation, appToken, session);
+            log.info("Contract updated for contract Id {}", session.getContractId());
             session.setStatus(Session.STATUS.COMPLETED);
             session = sessionService.saveSession(session);
             messageService.saveModelMessage(aiResponse, session);
@@ -118,9 +118,7 @@ public class AgentControllerImpl implements AgentController {
     private MessageDTO finalizeStageOne(String appToken, ModelMessage aiResponse, Session session) {
         try {
             GeneralInformation generalInformation = ValidateInformation.mapTo(aiResponse.getContent(), GeneralInformation.class);
-            String contractId = contractService.processInitialRequest(generalInformation, appToken);
-            log.info("Contract saved with Id {}", contractId);
-            session.setContractId(contractId);
+            session = contractService.processInitialRequest(generalInformation, appToken, session);
             messageService.saveModelMessage(aiResponse, session);
             return startSecondPhase(session, generalInformation);
         } catch (Exception e) {

@@ -40,4 +40,7 @@ public class Session {
     @Column
     String contractId;
 
+    @Column
+    String employeeId;
+
 }

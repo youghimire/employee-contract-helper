@@ -47,5 +47,10 @@
             <column name="status" type="text"/>
         </addColumn>
     </changeSet>
+    <changeSet id="1720718901664-1" author="ujjwal">
+        <addColumn tableName="session">
+            <column name="employee_id" type="text"/>
+        </addColumn>
+    </changeSet>
 
 </databaseChangeLog>

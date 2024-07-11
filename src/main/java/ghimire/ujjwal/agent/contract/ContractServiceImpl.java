@@ -2,6 +2,7 @@ package ghimire.ujjwal.agent.contract;
 
 import ghimire.ujjwal.agent.postProcess.EmploymentInformation;
 import ghimire.ujjwal.agent.postProcess.GeneralInformation;
+import ghimire.ujjwal.agent.session.Session;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -32,7 +33,7 @@ public class ContractServiceImpl implements ContractService{
     }
 
     @Override
-    public String processInitialRequest(GeneralInformation generalInformation, String token) {
+    public Session processInitialRequest(GeneralInformation generalInformation, String token, Session session) {
         HttpHeaders headers = createHeader(token);
         log.info("Sending initial employee information to Contract API {}", generalInformation);
         HttpEntity<InitialRequest> entity = new HttpEntity<>(new InitialRequest(generalInformation), headers);
@@ -40,8 +41,8 @@ public class ContractServiceImpl implements ContractService{
         Assert.isTrue(StringUtils.isNotBlank(response.getBody()), "Request to Contract create API failed.");
         log.info("Response from Niural for initial request {}", response.getBody());
         Assert.isTrue(response.getStatusCode().is2xxSuccessful(), "Request to Contract create API failed.");
-        return getContractId(response);
-
+        setContractInformation(response, session);
+        return session;
     }
 
     public static class HandleNiuralError extends DefaultResponseErrorHandler {
@@ -54,17 +55,32 @@ public class ContractServiceImpl implements ContractService{
     }
 
     @Override
-    public String processFinalRequest(EmploymentInformation employmentInformation, GeneralInformation generalInformation, String appToken, String contractId) {
-        HttpHeaders headers = createHeader(appToken);
+    public Session processFinalRequest(EmploymentInformation employmentInformation, GeneralInformation generalInformation, String appToken, Session session) {
+
         log.info("Sending final employee information to Contract API {}", employmentInformation);
-        HttpEntity<UpdateRequest> entity = new HttpEntity<>(new UpdateRequest(generalInformation, employmentInformation), headers);
-        String requestUrl = "%s/%s".formatted(URL, contractId);
+
+        HttpEntity<Object> entity = getUpdateEntity(generalInformation, employmentInformation, session, appToken);
+        String requestUrl = "%s/%s".formatted(URL, session.getContractId());
         log.info("Request URL {}", requestUrl);
         ResponseEntity<String> response = restTemplate.exchange(requestUrl, HttpMethod.PATCH, entity, String.class);
         Assert.isTrue(StringUtils.isNotBlank(response.getBody()), "Request to Contract create API failed.");
         log.info("Response from Niural for update request {}", response.getBody());
         Assert.isTrue(response.getStatusCode().is2xxSuccessful(), "Request to Contract create API failed.");
-        return getContractId(response);
+        setContractInformation(response, session);
+        return session;
+    }
+
+    private HttpEntity<Object> getUpdateEntity(GeneralInformation generalInformation, EmploymentInformation employmentInformation, Session session, String appToken) {
+        HttpHeaders headers = createHeader(appToken);
+        if(employmentInformation.getVisaCompliance()) {
+            UpdateRequest updateRequest = new UpdateRequest(generalInformation, employmentInformation);
+            updateRequest.setEorEmployeeId(session.getEmployeeId());
+            return new HttpEntity<>(updateRequest, headers);
+        } else {
+            UpdateRequestNoCompliance updateRequest = new UpdateRequestNoCompliance(generalInformation);
+            updateRequest.setEorEmployeeId(session.getEmployeeId());
+            return new HttpEntity<>(updateRequest, headers);
+        }
     }
 
     private HttpHeaders createHeader(String token) {
@@ -76,12 +92,14 @@ public class ContractServiceImpl implements ContractService{
         return headers;
     }
 
-    private String getContractId(ResponseEntity<String> response) {
+    private void setContractInformation(ResponseEntity<String> response, Session session) {
         JSONObject responseJson = new JSONObject(response.getBody());
         Assert.isTrue(responseJson.has("message") && "Success".equalsIgnoreCase((String) responseJson.get("message")), "Post Contract did not return success message");
         Assert.isTrue(responseJson.has("data"), "Post contract does not return correct response");
         JSONObject data = responseJson.getJSONObject("data");
         Assert.isTrue(data.has("contract_id"), "Post contract does not return correct response");
-        return (String) data.get("contract_id");
+        Assert.isTrue(data.has("eor_employee_id"), "Post contract does not return correct response");
+        session.setContractId((String)data.get("contract_id"));
+        session.setEmployeeId((String)data.get("eor_employee_id"));
     }
 }
