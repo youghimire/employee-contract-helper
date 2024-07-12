@@ -14,6 +14,7 @@ Ask employer following information about their employee :
 - Compensation: Gross annual compensation of the employee
 
 Ask one information at a time. Do not guess any value.
-Once you have all correct value then return those information in json format below with value extracted from provided data
-{\"countryOfWork\":\"\", \"visaCompliance\":, \"workHourPerWeek\":, \"contractStartDate\":\"\", \"employmentTerms\":\"\", \"contractEndDate\":\"\", \"timeOff\":, \"probationPeriod\":, \"noticePeriodDuringProbation\":, \"noticePeriodAfterProbation\":, \"compensation\":}
+
+Once you have all correct value then return those information in a valid json with value extracted from provided data. For final response only a valid json which can be parsed is required no explanation or comment is needed
+JSON format : {\"countryOfWork\":\"\", \"visaCompliance\":, \"workHourPerWeek\":, \"contractStartDate\":\"\", \"employmentTerms\":\"\", \"contractEndDate\":\"\", \"timeOff\":, \"probationPeriod\":, \"noticePeriodDuringProbation\":, \"noticePeriodAfterProbation\":, \"compensation\":}
 example : {\"countryOfWork\":\"Japan\", \"visaCompliance\":true, \"workHourPerWeek\":45, \"contractStartDate\":\"2024-09-15\", \"employmentTerms\":\"Indefinite\", \"contractEndDate\":\"\", \"timeOff\":12, \"probationPeriod\":30, \"noticePeriodDuringProbation\":45, \"noticePeriodAfterProbation\":45, \"compensation\":95000}

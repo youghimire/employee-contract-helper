@@ -5,6 +5,9 @@ import ghimire.ujjwal.agent.postProcess.GeneralInformation;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
 @Data
 @NoArgsConstructor
 public class UpdateRequestNoCompliance {
@@ -18,14 +21,12 @@ public class UpdateRequestNoCompliance {
         scopeOfWork = generalInformation.getScopeOfWork();
         workLocationCountry = new CountryISO(generalInformation.getCountryOfWorkISOAlpha2());
         countryOfCitizenship = new CountryISO(generalInformation.getCountryOfCitizenISOAlpha2());
-        employeeCurrentlyResidingCountry = workLocationCountry;
-        workHoursPerWeek = 40;
-        timeOffDays = 10;
-        probationPeriod = 0;
+        employeeCurrentlyResidingCountry = countryOfCitizenship;
     }
 
     private Boolean niuralVisaSupportRequired = true;
     private String highestEducationLevel = "MASTER_DEGREE";
+    private String contractStartDate = LocalDate.now().plusDays(6).format(DateTimeFormatter.ISO_LOCAL_DATE);
 
     String contractType = "EOR";
     private String niuralEntityToUse = "NIURAL_INC";
@@ -42,9 +43,9 @@ public class UpdateRequestNoCompliance {
     private CountryISO countryOfCitizenship;
     private CountryISO employeeCurrentlyResidingCountry;
 
-    private Integer workHoursPerWeek;
-    private Integer timeOffDays;
-    private Integer probationPeriod;
+    private Integer workHoursPerWeek = 40;
+    private Integer timeOffDays = 10;
+    private Integer probationPeriod = 0;
 
     private String employmentType = "FULL_TIME";
     private String compensationType = "ANNUAL";

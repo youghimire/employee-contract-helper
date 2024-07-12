@@ -61,7 +61,7 @@ public class ContractServiceImpl implements ContractService{
 
         HttpEntity<Object> entity = getUpdateEntity(generalInformation, employmentInformation, session, appToken);
         String requestUrl = "%s/%s".formatted(URL, session.getContractId());
-        log.info("Request URL {}", requestUrl);
+        log.info("Request URL {} \n with Body {}", requestUrl, entity);
         ResponseEntity<String> response = restTemplate.exchange(requestUrl, HttpMethod.PATCH, entity, String.class);
         Assert.isTrue(StringUtils.isNotBlank(response.getBody()), "Request to Contract create API failed.");
         log.info("Response from Niural for update request {}", response.getBody());
